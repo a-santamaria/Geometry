@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/alfredo/Dropbox/9/geometria/convexHull/convex-hull.cxx
+convex-hull.h
+/home/alfredo/Dropbox/9/geometria/convexHull/convex-hull.h
+algorithm
+-
+iostream
+-
+cfloat
+-
+cmath
+-
+
+/home/alfredo/Dropbox/9/geometria/convexHull/convex-hull.h
+vector
+-
+
