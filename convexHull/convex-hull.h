@@ -6,7 +6,6 @@
 using namespace std;
 
 
-
 class Point{
 public:
     double x, y;
@@ -26,7 +25,9 @@ public:
     Vec(double _x, double _y): x (_x), y (_y){}
 };
 
-
+double randF();
+void randEllipse( double r1, double r2, double cx, double cy, double d,
+                  double& x, double& y);
 Vec toVec(Point p, Point q);
 bool ccw(Point p, Point q, Point r);
 bool collinear(Point p, Point q, Point r);

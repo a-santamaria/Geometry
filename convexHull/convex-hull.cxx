@@ -10,6 +10,23 @@ bool Point::operator< (const Point &other) const{
     return x < other.x;
 }
 
+double randF(){
+    return ((double)rand() / RAND_MAX);
+}
+
+void randEllipse( double r1, double r2, double cx, double cy, double d,
+                  double& x, double& y)
+{
+    double rx = randF()*r1;
+    double ry = randF()*r2;
+    double theta = randF() * 2 * M_PI;
+    double a = sqrt(rx);
+    double b = sqrt(ry);
+    double alpha = d * M_PI;
+    x = cx + ( a * cos(theta) * cos(alpha) ) - ( b * sin(theta) * sin(alpha) );
+    y = cy + ( a * cos(theta) * sin(alpha) ) + ( b * sin(theta) * cos(alpha) );
+}
+
 double Vec::cross(Vec b){
     return this->x * b.y - this->y * b.x;
 }

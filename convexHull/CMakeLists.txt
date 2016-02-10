@@ -62,9 +62,11 @@ INCLUDE_DIRECTORIES(
 ## =====================
 ## = Compilation rules =
 ## =====================
-FILE(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/*.cxx)
-ADD_EXECUTABLE(convex_hull ${SRC_FILES})
+
+ADD_EXECUTABLE(convex_hull convex-hull.cxx convex-hull-client.cxx)
 TARGET_LINK_LIBRARIES(convex_hull ${VTK_LIBRARIES})
+ADD_EXECUTABLE(convex_hull2 convex-hull.cxx convex-hull-client-charts.cxx)
+TARGET_LINK_LIBRARIES(convex_hull2 ${VTK_LIBRARIES})
 
 
 
