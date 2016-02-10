@@ -145,9 +145,7 @@ vector<Point> ConvexHull::divideAndConquer(int lo, int hi){
         return hull;
     }
     if(hi - lo == 1){
-
             hull.push_back(points[lo]);
-
             hull.push_back(points[hi]);
             return hull;
     }
@@ -184,14 +182,13 @@ vector<Point> ConvexHull::mergeTangent(vector<Point>& lh, vector<Point>& rh){
 
     //find rightmost point left hull lh
     int indexL;
-    double maxL = 0;
+    double maxL = -DBL_MAX;
 
     for(int i = 0; i < lh.size(); i++)
         if(lh[i].x > maxL){
             maxL = lh[i].x;
             midL = i;
         }
-
     //find leftmost point right hull rh
     int indexR;
     double minR = DBL_MAX;
@@ -201,7 +198,6 @@ vector<Point> ConvexHull::mergeTangent(vector<Point>& lh, vector<Point>& rh){
             minR = rh[i].x;
             midR = i;
         }
-
     Point l1, l2, r1, r2;
     //lower tangent
     indexL =  midL;

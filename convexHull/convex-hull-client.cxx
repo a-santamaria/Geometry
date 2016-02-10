@@ -47,7 +47,7 @@ int main( int argc, char* argv[] )
         return -1;
     }
 
-    int NumP = atof( argv[2] );
+    int NumP = atoi( argv[2] );
     if(NumP < 2){
         cerr<<"num_ponts most be grater than 1"<<endl;
         return -1;
@@ -82,8 +82,8 @@ int main( int argc, char* argv[] )
     colors->SetNumberOfComponents(3);
     colors->SetName ("Colors");
 
+    double x, y;
     for(int i = 0 ; i < NumP; i++){
-        double x, y;
         randEllipse(radious1, radious2, centerX, centerY, pct, x, y);
         points.push_back(Point(x, y));
         pointsVTK->InsertNextPoint (x, y, 0);
