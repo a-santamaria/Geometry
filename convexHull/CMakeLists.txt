@@ -65,8 +65,6 @@ INCLUDE_DIRECTORIES(
 
 ADD_EXECUTABLE(convex_hull convex-hull.cxx convex-hull-client.cxx)
 TARGET_LINK_LIBRARIES(convex_hull ${VTK_LIBRARIES})
-ADD_EXECUTABLE(convex_hull2 convex-hull.cxx convex-hull-client-charts.cxx)
-TARGET_LINK_LIBRARIES(convex_hull2 ${VTK_LIBRARIES})
 
 
 

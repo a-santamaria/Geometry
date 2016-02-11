@@ -54,14 +54,16 @@ int main( int argc, char* argv[] )
     double centerX, centerY, radious1, radious2, pct;
     double x, y;
     double elapsed_secs;
-    vector<Point> points;
+
 
     for(int i = numS ; i <= numE; i += delta){
+
         radious1 = randF() / (double)100000;
         radious2 = randF() / (double)100000;
         centerX = 0;
         centerY = 0;
         pct = randF();
+        vector<Point> points;
         for(int j = 0 ; j < i; j++){
             randEllipse(radious1, radious2, centerX, centerY, pct, x, y);
             points.push_back(Point(x, y));
@@ -82,6 +84,7 @@ int main( int argc, char* argv[] )
         elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 
         out << i << ", " << elapsed_secs << endl;
+        //cout << i << ", " << elapsed_secs << endl;
     }
     return EXIT_SUCCESS;
 }

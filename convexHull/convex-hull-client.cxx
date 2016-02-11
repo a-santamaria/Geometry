@@ -91,6 +91,7 @@ int main( int argc, char* argv[] )
         colors->InsertNextTupleValue(pointColor);
     }
 
+    clock_t begin = clock();
     ConvexHull convexHull(points);
     vector<Point> hull;
     if(algo == "naive")
@@ -100,6 +101,10 @@ int main( int argc, char* argv[] )
     if(algo == "divide")
         hull = convexHull.divideAndConquer();
 
+    clock_t end = clock();
+    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+
+    cout << "time: " << elapsed_secs << endl;
 
     vtkSmartPointer<vtkPolyLine> xPolyLine =
       vtkSmartPointer<vtkPolyLine>::New();
