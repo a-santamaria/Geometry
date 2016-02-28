@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "point.h"
+#include "lineIntersection.h"
 
 #include <vtkVersion.h>
 #include <vtkSmartPointer.h>
@@ -44,8 +45,12 @@ int main( int argc, char* argv[] )
 
     srand (time(NULL));
     vector<Point> points;
+    vector<Segment> segments;
 
     vtkSmartPointer<vtkPoints> pointsVTK =
+      vtkSmartPointer<vtkPoints>::New();
+
+    vtkSmartPointer<vtkPoints> intersectionPoints =
       vtkSmartPointer<vtkPoints>::New();
 
     unsigned char pointColor[3] = {255, 255, 255};
@@ -55,18 +60,19 @@ int main( int argc, char* argv[] )
     colors->SetNumberOfComponents(3);
     colors->SetName ("Colors");
 
-    double x, y;
+    double x1, y1, x2, y2;
     vtkCellArray *cells = vtkCellArray::New();
     cells->Initialize();
 
     for(int i = 0 ; i < NumL; i++){
-        randEllipse(10, 10, 0, 0, 1, x, y);
-        points.push_back(Point(x, y));
-        vtkIdType id1 = pointsVTK->InsertNextPoint (x, y, 0);
-        randEllipse(10, 10, 0, 0, 1, x, y);
-        points.push_back(Point(x, y));
-        vtkIdType id2 = pointsVTK->InsertNextPoint (x, y, 0);
+        randEllipse(10, 10, 0, 0, 1, x1, y1);
+        points.push_back(Point(x1, y1));
+        vtkIdType id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
+        randEllipse(10, 10, 0, 0, 1, x2, y2);
+        points.push_back(Point(x2, y2));
+        vtkIdType id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
 
+        segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
         vtkLine *line = vtkLine::New();
         line->GetPointIds()->SetId(0, id1);
         line->GetPointIds()->SetId(1, id2);
@@ -77,8 +83,44 @@ int main( int argc, char* argv[] )
         colors->InsertNextTupleValue(pointColor);
     }
 
+    /*
+    x1 = 0.6271, y1 = -1.36376, x2 = -0.0259642, y2 = 2.41473;
+    vtkIdType id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
+    vtkIdType id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
+    segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
+    vtkLine *line = vtkLine::New();
+    line->GetPointIds()->SetId(0, id1);
+    line->GetPointIds()->SetId(1, id2);
+
+    cells->InsertNextCell(line);
+
+
+    x1 = -0.262223, y1 = -0.214945, x2 = 2.05051, y2 = -0.224838;
+     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
+     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
+    segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
+    line = vtkLine::New();
+    line->GetPointIds()->SetId(0, id1);
+    line->GetPointIds()->SetId(1, id2);
+
+    cells->InsertNextCell(line);
+
+*/
+
+
+
+    //TODO change clock_t for the other library
+
+    LineIntersection lineInt(segments);
+
     clock_t begin = clock();
 
+    vector<Point> ints = lineInt.sweep_line();
+
+    for(int i = 0; i < ints.size(); i++){
+        intersectionPoints->InsertNextPoint (ints[i].x, ints[i].y, 0);
+        pointsVTK->InsertNextPoint (ints[i].x, ints[i].y, 0);
+    }
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
@@ -88,30 +130,17 @@ int main( int argc, char* argv[] )
 
 
 
-
-
-/*** ------------- draw points and contour --------------- **/
-    /*
-    vtkSmartPointer<vtkPolyLine> xPolyLine =
-      vtkSmartPointer<vtkPolyLine>::New();
-    xPolyLine->GetPointIds()->SetNumberOfIds(contour.size());
-
-    for(int i = 0; i < contour.size(); i++)
-    {
-        vtkIdType id = pointsVTK->InsertNextPoint(contour[i].x, contour[i].y, 0);
-        xPolyLine->GetPointIds()->SetId(i,id);
-    }
-
-
-    vtkSmartPointer<vtkCellArray> cells =
-      vtkSmartPointer<vtkCellArray>::New();
-    cells->InsertNextCell(xPolyLine);
-    */
+/** ---------------------------------------------------- **/
 
     vtkSmartPointer<vtkPolyData> pointsPolydata =
       vtkSmartPointer<vtkPolyData>::New();
 
     pointsPolydata->SetPoints(pointsVTK);
+
+    vtkSmartPointer<vtkPolyData> pointsPolydata2 =
+      vtkSmartPointer<vtkPolyData>::New();
+
+    pointsPolydata2->SetPoints(intersectionPoints);
 
     vtkSmartPointer<vtkVertexGlyphFilter> vertexFilter =
       vtkSmartPointer<vtkVertexGlyphFilter>::New();

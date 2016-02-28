@@ -6,8 +6,24 @@
 
 using namespace std;
 
-bool Point::operator< (const Point &other) const{
-    return x < other.x;
+bool Point::operator< (const Point& other) const{
+    if(y == other.y)
+        return x < other.x;
+    return y < other.y;
+}
+
+Point Point::operator- (const Point& other){
+    Point p(this->x-other.x, this->y-other.y);
+    return p;
+}
+
+Point Point::operator+ (const Point& other){
+    Point p(this->x+other.x, this->y+other.y);
+    return p;
+}
+
+bool Segment::operator< (const Segment& other) const{
+    return p.y < other.p.y;
 }
 
 double randF(){
@@ -27,7 +43,7 @@ void randEllipse( double r1, double r2, double cx, double cy, double d,
     y = cy + ( a * cos(theta) * sin(alpha) ) + ( b * sin(theta) * cos(alpha) );
 }
 
-double Vec::cross(Vec b){
+double Vec::crossMag(Vec b){
     return this->x * b.y - this->y * b.x;
 }
 
@@ -36,11 +52,11 @@ Vec toVec(Point p, Point q){
 }
 
 bool ccw(Point p, Point q, Point r){
-    return toVec(q, p).cross( toVec(q, r) ) < 0;
+    return toVec(q, p).crossMag( toVec(q, r) ) < 0;
 }
 
 bool collinear(Point p, Point q, Point r){
-    return toVec(q, p).cross( toVec(q, r) ) == 0;
+    return toVec(q, p).crossMag( toVec(q, r) ) == 0;
 }
 
 double dist(Point p, Point q){

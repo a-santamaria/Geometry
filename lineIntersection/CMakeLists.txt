@@ -63,7 +63,7 @@ INCLUDE_DIRECTORIES(
 ## = Compilation rules =
 ## =====================
 
-ADD_EXECUTABLE(lineClient lineIntersection-client.cxx point.cxx )
+ADD_EXECUTABLE(lineClient lineIntersection-client.cxx point.cxx lineIntersection.cxx)
 TARGET_LINK_LIBRARIES(lineClient ${VTK_LIBRARIES})
 
 
