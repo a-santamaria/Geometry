@@ -2,8 +2,15 @@
 #include <cstdlib>
 #include <cassert>
 #include <iostream>
+#include <list>
 
-Node::Node(double _key, Segment* _val, bool _color, int _N) :
+Node::Node(Point _key, Segment* seg, bool _color, int _N) :
+    key(_key), color(_color), N(_N) {
+    val.push_front(seg);
+    this->left = this->right = NULL;
+}
+
+Node::Node(Point _key, std::list<Segment*> _val, bool _color, int _N) :
     key(_key), val(_val), color(_color), N(_N) {
     this->left = this->right = NULL;
 }
@@ -34,27 +41,32 @@ bool RedBlackBST::isEmpty() {
 *  Standard BST search.
 ***************************************************************************/
 
-Segment* RedBlackBST::get(double key) {
+std::list<Segment*>* RedBlackBST::get(Point key) {
     return get(root, key);
 }
 
-Segment* RedBlackBST::get(Node* x, double key) {
+std::list<Segment*>* RedBlackBST::get(Node* x, Point key) {
     while (x != NULL) {
-        if  (key == x->key) return x->val;
+        if  (key == x->key) return &(x->val);
         if  (key < x->key)  x = x->left;
         else                x = x->right;
     }
+
     return NULL;
 }
 
-bool RedBlackBST::contains(double key) {
+bool RedBlackBST::contains(Point key) {
     return get(key) != NULL;
 }
 
 /***************************************************************************
 *  Red-black tree insertion.
 ***************************************************************************/
-void RedBlackBST::put(double key, Segment* val) {
+void RedBlackBST::putNeighbors(Point key, Segment* f, Segment* s){
+    //TODO
+}
+
+void RedBlackBST::put(Point key, Segment* val) {
     if (val == NULL) {
         del(key);
         return;
@@ -64,11 +76,11 @@ void RedBlackBST::put(double key, Segment* val) {
     root->color = BLACK;
 }
 
-Node* RedBlackBST::put(Node* h, double key, Segment* val) {
+Node* RedBlackBST::put(Node* h, Point key, Segment* val) {
     if (h == NULL) return new Node(key, val, RED, 1);
 
-    //TODO agregar a la lista (posiblemente)
-    if       (key == h->key) h->val = val;
+    //TODO no se si push back de una o mirar
+    if       (key == h->key) h->val.push_back(val);
     else if  (key < h->key)  h->left  = put(h->left,  key, val);
     else                     h->right = put(h->right, key, val);
 
@@ -138,7 +150,8 @@ Node* RedBlackBST::deleteMax(Node* h) {
     return balance(h);
 }
 
-void RedBlackBST::del(double key) {
+void RedBlackBST::del(Point key, Segment* prev){
+    //TODO
     if (!contains(key)) return;
 
     // if both children of root are black, set root to red
@@ -149,8 +162,18 @@ void RedBlackBST::del(double key) {
     if (!isEmpty()) root->color = BLACK;
 }
 
-Node* RedBlackBST::del(Node* h, double key) {
-    // assert get(h, key) != NULL;
+void RedBlackBST::del(Point key) {
+    if (!contains(key)) return;
+
+    // if both children of root are black, set root to red
+    if (!isRed(root->left) && !isRed(root->right))
+        root->color = RED;
+
+    root = del(root, key);
+    if (!isEmpty()) root->color = BLACK;
+}
+
+Node* RedBlackBST::del(Node* h, Point key) {
 
     if (key < h->key)  {
         if (!isRed(h->left) && !isRed(h->left->left))
@@ -168,8 +191,7 @@ Node* RedBlackBST::del(Node* h, double key) {
             Node* x = min(h->right);
             h->key = x->key;
             h->val = x->val;
-            // h.val = get(h.right, min(h.right).key);
-            // h.key = min(h.right).key;
+
             h->right = deleteMin(h->right);
         }
         else h->right = del(h->right, key);
@@ -254,7 +276,7 @@ Node* RedBlackBST::balance(Node* h) {
 ***************************************************************************/
 
 // Returns the smallest key in the symbol table.
-double RedBlackBST::min() {
+Point RedBlackBST::min() {
     assert (!isEmpty());
     return min(root)->key;
 }
@@ -266,7 +288,7 @@ Node* RedBlackBST::min(Node* x) {
 }
 
 // Returns the largest key in the symbol table.
-double RedBlackBST::max() {
+Point RedBlackBST::max() {
     assert (!isEmpty());
     return max(root)->key;
 }
@@ -277,16 +299,15 @@ Node* RedBlackBST::max(Node* x) {
     else                 return max(x->right);
 }
 
-// Returns the largest key in the symbol table less than or equal to <tt>key</tt>.
-double RedBlackBST::floor(double key) {
-    assert (!isEmpty());
+// Returns the node with largest key in the symbol table less than or equal to <tt>key</tt>.
+Node* RedBlackBST::floor(Point key) {
+    if (isEmpty()) return NULL;
     Node* x = floor(root, key);
-    assert (x != NULL);
-    return x->key;
+    return x;
 }
 
 // the largest key in the subtree rooted at x less than or equal to the given key
-Node* RedBlackBST::floor(Node* x, double key) {
+Node* RedBlackBST::floor(Node* x, Point key) {
     if (x == NULL) return NULL;
 
     if (key == x->key) return x;
@@ -296,17 +317,15 @@ Node* RedBlackBST::floor(Node* x, double key) {
     else           return x;
 }
 
-// Returns the smallest key in the symbol table greater than or equal to <tt>key</tt>.
-double RedBlackBST::ceiling(double key) {
-    assert (!isEmpty());
-
+// Returns the node with smallest key in the symbol table greater than or equal to key
+Node* RedBlackBST::ceiling(Point key) {
+    if (isEmpty()) return NULL;
     Node* x = ceiling(root, key);
-    assert (x != NULL);
-    return x->key;
+    return x;
 }
 
 // the smallest key in the subtree rooted at x greater than or equal to the given key
-Node* RedBlackBST::ceiling(Node* x, double key) {
+Node* RedBlackBST::ceiling(Node* x, Point key) {
     if (x == NULL) return NULL;
     if (key == x->key) return x;
     if (key > x->key)  return ceiling(x->right, key);
@@ -315,13 +334,13 @@ Node* RedBlackBST::ceiling(Node* x, double key) {
     else           return x;
 }
 
-// Return the number of keys in the symbol table strictly less than <tt>key</tt>.
-int RedBlackBST::rank(double key) {
+// Return the number of keys in the symbol table strictly less than key.
+int RedBlackBST::rank(Point key) {
     return rank(key, root);
 }
 
 // number of keys less than key in the subtree rooted at x
-int RedBlackBST::rank(double key, Node* x) {
+int RedBlackBST::rank(Point key, Node* x) {
     if (x == NULL) return 0;
     if      (key < x->key) return rank(key, x->left);
     else if (key > x->key) return 1 + size(x->left) + rank(key, x->right);

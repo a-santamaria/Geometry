@@ -8,24 +8,24 @@
 class compareByY{
 public:
     compareByY() {}
-    bool operator() (const std::pair<Point, Segment>& p, const std::pair<Point, Segment>& q) const
+    bool operator() (const std::pair<Point, Segment*>& p, const std::pair<Point, Segment*>& q) const
     {
       if(p.first.y == q.first.y) return p.first.x < q.first.x;
-      return p.first.y < q.first.y;
+      return p.first.y > q.first.y;
     }
 };
 
 class LineIntersection{
 private:
-    std::vector<Segment> segments;
-    std::priority_queue< std::pair<Point, Segment>,
-                         std::vector<std::pair<Point, Segment> >,
+    std::vector<Segment*> segments;
+    std::priority_queue< std::pair<Point, Segment*>,
+                         std::vector<std::pair<Point, Segment*> >,
                          compareByY > eventQueue;
-    bool intersect(const Segment s, const Segment t, Point& p);
+    bool intersect(const Segment* s, const Segment* t, Point& p);
 
 public:
     LineIntersection();
-    LineIntersection(std::vector<Segment> _segments) : segments(_segments) {}
+    LineIntersection(std::vector<Segment*> _segments) : segments(_segments) {}
     std::vector<Point> sweep_line();
 };
 

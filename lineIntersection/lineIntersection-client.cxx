@@ -54,7 +54,7 @@ int main( int argc, char* argv[] )
 
     srand (time(NULL));
     vector<Point> points;
-    vector<Segment> segments;
+    vector<Segment*> segments;
 
     vtkSmartPointer<vtkPoints> pointsVTK =
       vtkSmartPointer<vtkPoints>::New();
@@ -81,7 +81,7 @@ int main( int argc, char* argv[] )
         points.push_back(Point(x2, y2));
         vtkIdType id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
 
-        segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
+        segments.push_back( new Segment(Point(x1, y1), Point(x2, y2)) );
         vtkLine *line = vtkLine::New();
         line->GetPointIds()->SetId(0, id1);
         line->GetPointIds()->SetId(1, id2);
@@ -192,6 +192,6 @@ int main( int argc, char* argv[] )
 
     renderWindow->Render();
     renderWindowInteractor->Start();
-    
+
     return EXIT_SUCCESS;
 }

@@ -2,6 +2,7 @@
 #define RED_BLACK_BST_H
 
 #include "point.h"
+#include <list>
 
 /******************************************************************************
  *  Left Leaniing Red-Black Tree implementation
@@ -20,13 +21,14 @@
 
 class Node {
 public:
-    double key;         // key
-    Segment* val;       // associated data
-    Node *left, *right; // links to left and right subtrees
-    bool color;         // color of parent link
-    int N;              // subtree count
+    Point key;            // key
+    std::list<Segment*> val; // associated data
+    Node *left, *right;   // links to left and right subtrees
+    bool color;           // color of parent link
+    int N;                // subtree count
 
-    Node(double _key, Segment* _val, bool _color, int _N);
+    Node(Point _key, Segment* seg, bool _color, int _N);
+    Node(Point _key, std::list<Segment*> _val, bool _color, int _N);
 };
 
 class RedBlackBST {
@@ -39,13 +41,13 @@ private:
 
     bool isRed(Node* x);
     int size(Node* x);
-    Segment* get(Node* x, double key);
-    Node* put(Node* h, double key, Segment* val);
+    std::list<Segment*>* get(Node* x, Point key);
+    Node* put(Node* h, Point key, Segment* val);
 
     //Red-black tree deletion.
     Node* deleteMin(Node* h);
     Node* deleteMax(Node* h);
-    Node* del(Node* h, double key);
+    Node* del(Node* h, Point key);
 
     //Red-black tree helper functions.
     Node* rotateRight(Node* h);
@@ -58,30 +60,32 @@ private:
     //Ordered symbol table methods.
     Node* min(Node* x);
     Node* max(Node* x);
-    Node* floor(Node* x, double key);
-    Node* ceiling(Node* x, double key);
-    int rank(double key, Node* x);
+    Node* floor(Node* x, Point key);
+    Node* ceiling(Node* x, Point key);
+    int rank(Point key, Node* x);
 
 
 public:
     RedBlackBST();
     int size();
     bool isEmpty();
-    Segment* get(double key);
-    bool contains(double key);
-    void put(double key, Segment* val);
+    std::list<Segment*>* get(Point key);
+    bool contains(Point key);
+    void put(Point key, Segment* val);
+    void putNeighbors(Point key, Segment* f, Segment* s);
 
     //Red-black tree deletion.
     void deleteMin();
     void deleteMax();
-    void del(double key);
+    void del(Point key);
+    void del(Point key, Segment* prev);
 
     //Ordered symbol table methods.
-    double min();
-    double max();
-    double floor(double key);
-    double ceiling(double key);
-    int rank(double key);
+    Point min();
+    Point max();
+    Node* floor(Point key);
+    Node* ceiling(Point key);
+    int rank(Point key);
 };
 
 
