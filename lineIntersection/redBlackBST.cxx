@@ -352,6 +352,7 @@ int RedBlackBST::rank(Point key, Node* x) {
 
 void RedBlackBST::printTree(){
     if(root == NULL) return;
+    std::cout << "--------------tree -------------------" << std::endl;
     std::queue<std::pair<Node*, int> > q;
     q.push(std::make_pair(root, 0));
     int voy = 0;
@@ -362,11 +363,15 @@ void RedBlackBST::printTree(){
             voy++;
             std::cout << std::endl;
         }
-        if(curr.first->left != NULL)
+
+        if(curr.first != NULL){
             q.push(std::make_pair(curr.first->left, curr.second+1));
-        if(curr.first->right != NULL)
             q.push(std::make_pair(curr.first->right, curr.second+1));
-        std::cout << curr.first->key.x << " ";
+            std::cout << curr.first->key.x << " <-> ";
+        }
+        else
+            std::cout << " NULL  <-> " ;
     }
+    std::cout << std::endl << "------------------------------------" << std::endl;
 
 }

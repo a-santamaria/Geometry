@@ -9,71 +9,81 @@ std::vector<Point> LineIntersection::sweep_line(){
     std::vector<Point> intersections;
 
     for(int i = 0; i < segments.size(); i++){
-        eventQueue.push(std::make_pair(segments[i]->p, segments[i]));
-        eventQueue.push(std::make_pair(segments[i]->q, segments[i]));
+        eventQueue.push(Event(segments[i]->p, segments[i]));
+        eventQueue.push(Event(segments[i]->q, segments[i]));
     }
 
     RedBlackBST st;
     Point aux;
 
     while(!eventQueue.empty()){
-        std::pair<Point, Segment*> curr = eventQueue.top();
+        Event curr = eventQueue.top();
         eventQueue.pop();
 
-        Node* prev = st.floor(curr.first);
-        Node* next = st.ceiling(curr.first);
+        std::cout << "(((((((((((evento)))))))))))" << std::endl;
+        std::cout << curr.key.x <<"  "<<curr.key.y << std::endl;
+        std::cout << std::endl << std::endl;
+
+
+        Node* prev = st.floor(curr.key);
+        Node* next = st.ceiling(curr.key);
 
         //first event of segemtne then add to tree
-        if(curr.first.y >= curr.second->p.y &&
-            curr.first.y >= curr.second->q.y){
+        if(curr.key.y >= curr.s->p.y &&
+            curr.key.y >= curr.s->q.y){
 
             //check for intersections with neighbours
             if(prev != NULL){
-                if( intersect(curr.second, prev->val.back(), aux) ){
+                if( intersect(curr.s, prev->val.back(), aux) ){
                     intersections.push_back(aux);
                     Segment* prevSeg = prev->val.back();
 
-                    //no se si hay una mejor forma en vez de borrarlos
-                    st.del(prev->key);
-                    st.del(curr.first);
+                    //intersect event delete segments befor that
+                    if(curr.hasPrev){
+                        st.del(curr.prevKey);
+                    }
 
                     //cange order put in the same key
-                    st.put(aux, curr.second);
+                    st.put(aux, curr.s);
                     st.put(aux, prevSeg);
 
                     //add both intependantly in queue
-                    eventQueue.push(std::make_pair(aux, curr.second));
-                    eventQueue.push(std::make_pair(aux, prevSeg));
+                    eventQueue.push(Event(aux, curr.s, curr.key));
+                    eventQueue.push(Event(aux, prevSeg, prev->key));
                 }
             }
             if(next != NULL){
-                if( intersect(curr.second, next->val.back(), aux) ){
+                if( intersect(curr.s, next->val.back(), aux) ){
                     intersections.push_back(aux);
                     Segment* nextSeg = next->val.front();
 
-                    //no se si hay una mejor forma en vez de borrarlos
-                    st.del(next->key);
-                    st.del(curr.first);
+                    //intersect event delete segments befor that
+                    if(curr.hasPrev){
+                        st.del(curr.prevKey);
+                    }
 
                     //cange order put in the same key
                     st.put(aux, nextSeg);
-                    st.put(aux, curr.second);
+                    st.put(aux, curr.s);
 
                     //add both intependantly in queue
-                    eventQueue.push(std::make_pair(aux, nextSeg));
-                    eventQueue.push(std::make_pair(aux, curr.second));
+                    eventQueue.push(Event(aux, nextSeg, next->key));
+                    eventQueue.push(Event(aux, curr.s, curr.key));
                 }
             }
 
             //add to the tree
-            st.put(curr.first, curr.second);
+            st.put(curr.key, curr.s);
         }
         else{ //last event of segemnte then delete from tree
             //in case there is more than one with same key
-            st.delOnly(curr.first, curr.second);
+            st.delOnly(curr.key, curr.s);
             //st.del(curr.first);
         }
 
+
+        st.printTree();
+        std::cout << std::endl << std::endl;
     }
 
     return intersections;
