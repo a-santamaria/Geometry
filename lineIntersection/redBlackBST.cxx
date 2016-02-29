@@ -41,13 +41,13 @@ bool RedBlackBST::isEmpty() {
 *  Standard BST search.
 ***************************************************************************/
 
-std::list<Segment*>* RedBlackBST::get(Point key) {
+Node* RedBlackBST::get(Point key) {
     return get(root, key);
 }
 
-std::list<Segment*>* RedBlackBST::get(Node* x, Point key) {
+Node* RedBlackBST::get(Node* x, Point key) {
     while (x != NULL) {
-        if  (key == x->key) return &(x->val);
+        if  (key == x->key) return x;
         if  (key < x->key)  x = x->left;
         else                x = x->right;
     }
@@ -62,10 +62,6 @@ bool RedBlackBST::contains(Point key) {
 /***************************************************************************
 *  Red-black tree insertion.
 ***************************************************************************/
-void RedBlackBST::putNeighbors(Point key, Segment* f, Segment* s){
-    //TODO
-}
-
 void RedBlackBST::put(Point key, Segment* val) {
     if (val == NULL) {
         del(key);
@@ -150,16 +146,20 @@ Node* RedBlackBST::deleteMax(Node* h) {
     return balance(h);
 }
 
-void RedBlackBST::del(Point key, Segment* prev){
-    //TODO
-    if (!contains(key)) return;
-
-    // if both children of root are black, set root to red
-    if (!isRed(root->left) && !isRed(root->right))
-        root->color = RED;
-
-    root = del(root, key);
-    if (!isEmpty()) root->color = BLACK;
+void RedBlackBST::delOnly(Point key, Segment* s){
+    Node* node = get(key);
+    if(node != NULL){
+        if(node->val.size() == 1){
+            del(key);
+        }else{
+            std::list<Segment*>::iterator it;
+            for(it = node->val.begin(); it != node->val.end(); it++){
+                if(*it == s)
+                    break;
+            }
+            node->val.erase(it);
+        }
+    }
 }
 
 void RedBlackBST::del(Point key) {

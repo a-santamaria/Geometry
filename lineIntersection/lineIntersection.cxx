@@ -23,7 +23,7 @@ std::vector<Point> LineIntersection::sweep_line(){
         Node* prev = st.floor(curr.first);
         Node* next = st.ceiling(curr.first);
 
-        //first event add to tree
+        //first event of segemtne then add to tree
         if(curr.first.y >= curr.second->p.y &&
             curr.first.y >= curr.second->q.y){
 
@@ -31,19 +31,47 @@ std::vector<Point> LineIntersection::sweep_line(){
             if(prev != NULL){
                 if( intersect(curr.second, prev->val.back(), aux) ){
                     intersections.push_back(aux);
-                    st.del(prev->key, prev->val.back());
-                    st.putNeighbors(aux, curr.second, prev->val.back());
+                    Segment* prevSeg = prev->val.back();
+
+                    //no se si hay una mejor forma en vez de borrarlos
+                    st.del(prev->key);
+                    st.del(curr.first);
+
+                    //cange order put in the same key
+                    st.put(aux, curr.second);
+                    st.put(aux, prevSeg);
+
+                    //add both intependantly in queue
+                    eventQueue.push(std::make_pair(aux, curr.second));
+                    eventQueue.push(std::make_pair(aux, prevSeg));
                 }
             }
             if(next != NULL){
+                if( intersect(curr.second, next->val.back(), aux) ){
+                    intersections.push_back(aux);
+                    Segment* nextSeg = next->val.front();
 
+                    //no se si hay una mejor forma en vez de borrarlos
+                    st.del(next->key);
+                    st.del(curr.first);
+
+                    //cange order put in the same key
+                    st.put(aux, nextSeg);
+                    st.put(aux, curr.second);
+
+                    //add both intependantly in queue
+                    eventQueue.push(std::make_pair(aux, nextSeg));
+                    eventQueue.push(std::make_pair(aux, curr.second));
+                }
             }
 
             //add to the tree
             st.put(curr.first, curr.second);
         }
-        else{ //last event delete from tree
-
+        else{ //last event of segemnte then delete from tree
+            //in case there is more than one with same key
+            st.delOnly(curr.first, curr.second);
+            //st.del(curr.first);
         }
 
     }

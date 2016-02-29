@@ -41,7 +41,7 @@ private:
 
     bool isRed(Node* x);
     int size(Node* x);
-    std::list<Segment*>* get(Node* x, Point key);
+    Node* get(Node* x, Point key);
     Node* put(Node* h, Point key, Segment* val);
 
     //Red-black tree deletion.
@@ -69,16 +69,15 @@ public:
     RedBlackBST();
     int size();
     bool isEmpty();
-    std::list<Segment*>* get(Point key);
+    Node* get(Point key);
     bool contains(Point key);
     void put(Point key, Segment* val);
-    void putNeighbors(Point key, Segment* f, Segment* s);
 
     //Red-black tree deletion.
     void deleteMin();
     void deleteMax();
     void del(Point key);
-    void del(Point key, Segment* prev);
+    void delOnly(Point key, Segment* s);
 
     //Ordered symbol table methods.
     Point min();
