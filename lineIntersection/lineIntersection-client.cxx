@@ -22,6 +22,7 @@
 #include <vtkLine.h>
 #include <vtkCellArray.h>
 #include "vtkPolyLine.h"
+#include "redBlackBST.h"
 
 using namespace std;
 
@@ -30,6 +31,14 @@ using namespace std;
 
 int main( int argc, char* argv[] )
 {
+    /*RedBlackBST st;
+
+    for(int i = 0; i < 10; i++){
+        double r = randF();
+        cout<<r<<endl;
+        Segment* s = new Segment();
+        st.put(randF(), s);
+    }*/
 
     if(argc < 2){
         cerr<< "Usage: " << argv[0] << " num_lines" << endl;
@@ -183,6 +192,6 @@ int main( int argc, char* argv[] )
 
     renderWindow->Render();
     renderWindowInteractor->Start();
-
+    
     return EXIT_SUCCESS;
 }

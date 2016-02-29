@@ -1,4 +1,5 @@
 #include "lineIntersection.h"
+#include "redBlackBST.h"
 #include <iostream>
 
 using namespace std;

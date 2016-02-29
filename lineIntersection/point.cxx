@@ -12,6 +12,12 @@ bool Point::operator< (const Point& other) const{
     return y < other.y;
 }
 
+bool Point::operator== (const Point& other) const{
+    if((y == other.y) && (x == other.x))
+        return true;
+    return false;
+}
+
 Point Point::operator- (const Point& other){
     Point p(this->x-other.x, this->y-other.y);
     return p;

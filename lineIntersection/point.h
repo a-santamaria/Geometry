@@ -1,6 +1,8 @@
 #ifndef POINT_H
 #define POINT_H
 
+#define eps 1e-9
+
 class Point{
 public:
     double x;
@@ -10,6 +12,7 @@ public:
     Point(double _x, double _y) : x(_x), y(_y) {}
 
     bool operator< (const Point& other) const;
+    bool operator== (const Point& other) const;
     Point operator- (const Point& other);
     Point operator+ (const Point& other);
 };
