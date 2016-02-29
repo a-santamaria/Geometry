@@ -7,9 +7,9 @@
 using namespace std;
 
 bool Point::operator< (const Point& other) const{
-    if(y == other.y)
-        return x < other.x;
-    return y < other.y;
+    if(x == other.x)
+        return y < other.y;
+    return x < other.x;
 }
 
 bool Point::operator== (const Point& other) const{
