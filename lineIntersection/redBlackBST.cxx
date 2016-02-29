@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <list>
+#include <queue>
 
 Node::Node(Point _key, Segment* seg, bool _color, int _N) :
     key(_key), color(_color), N(_N) {
@@ -345,4 +346,27 @@ int RedBlackBST::rank(Point key, Node* x) {
     if      (key < x->key) return rank(key, x->left);
     else if (key > x->key) return 1 + size(x->left) + rank(key, x->right);
     else              return size(x->left);
+}
+
+
+
+void RedBlackBST::printTree(){
+    if(root == NULL) return;
+    std::queue<std::pair<Node*, int> > q;
+    q.push(std::make_pair(root, 0));
+    int voy = 0;
+    while(!q.empty()){
+        std::pair<Node*, int> curr = q.front();
+        q.pop();
+        if(voy < curr.second){
+            voy++;
+            std::cout << std::endl;
+        }
+        if(curr.first->left != NULL)
+            q.push(std::make_pair(curr.first->left, curr.second+1));
+        if(curr.first->right != NULL)
+            q.push(std::make_pair(curr.first->right, curr.second+1));
+        std::cout << curr.first->key.x << " ";
+    }
+
 }

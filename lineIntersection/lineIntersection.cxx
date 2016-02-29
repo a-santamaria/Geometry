@@ -80,7 +80,7 @@ std::vector<Point> LineIntersection::sweep_line(){
 }
 
 bool LineIntersection::intersect(const Segment* s, const Segment* t, Point& p){
-    std::cout << "entre" << std::endl;
+
     if( ccw(s->p, s->q, t->p) == ccw(s->p, s->q, t->q) ||
         ccw(t->p, t->q, s->p) == ccw(t->p, t->q, s->q)    )
         return false;
@@ -93,7 +93,6 @@ bool LineIntersection::intersect(const Segment* s, const Segment* t, Point& p){
 
     double ss = num / (den*den);
 
-    std::cout<<"s "<<ss<<std::endl;
     p.x = (s->q.x - s->p.x);
     p.y = (s->q.y - s->p.y);
     p.x = p.x*ss;

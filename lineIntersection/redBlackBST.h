@@ -85,6 +85,8 @@ public:
     Node* floor(Point key);
     Node* ceiling(Point key);
     int rank(Point key);
+
+    void printTree();
 };
 
 
