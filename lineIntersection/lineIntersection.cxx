@@ -28,47 +28,95 @@ std::vector<Point> LineIntersection::sweep_line(){
         Node* prev = st.floor(curr.key);
         Node* next = st.ceiling(curr.key);
 
+        //intersect event delete segments befor that
+        if(curr.hasPrev){
+            std::cout << "*******************************soy evento de inerseccion***************" << std::endl;
+
+
+            std::list<Point>::iterator it = curr.prevKey.begin();
+            for( ; it != curr.prevKey.end(); it++){
+                std::cout << "voy a borrar "<< it->x<< std::endl;
+                st.del(*it);
+            }
+
+            //TODO change order
+            std::list<Segment*>::reverse_iterator rit = curr.segments.rbegin();
+
+            for( ; rit != curr.segments.rend(); rit++)
+                st.put(curr.key, *rit);
+            // check intersection with new neighbours
+            std::list<Segment*>::iterator first = curr.segments.begin();
+            std::list<Segment*>::reverse_iterator last = curr.segments.rbegin();
+
+            if(prev != NULL){
+                if( intersect(*first, prev->val.back(), aux) ){
+                    intersections.push_back(aux);
+                    Segment* prevSeg = prev->val.back();
+
+                    //add both intependantly in queue
+                    std::cout << "agregar evento de interseccion prev" << std::endl;
+                    Event e(aux);
+                    e.addSegment(*first, curr.key);
+                    e.addSegment(prevSeg, prev->key);
+                    eventQueue.push(e);
+                    eventQueue.push(e);
+                }
+            }
+            if(next != NULL){
+                if( intersect(*last, next->val.front(), aux) ){
+                    intersections.push_back(aux);
+                    Segment* nextSeg = next->val.front();
+
+
+                    //add both intependantly in queue
+                    std::cout << "agregar evento de interseccion next" << std::endl;
+                    std::cout << "en "<<aux.x <<" "<<aux.y << std::endl;
+                    std::cout << "parents "<< next->key.x <<" y "<<curr.key.x<< std::endl;
+                    Event e(aux);
+                    e.addSegment(nextSeg, next->key);
+                    e.addSegment(*last, curr.key);
+                    eventQueue.push(e);
+                }
+            }
+
+
+        }
+        else
         //first event of segemtne then add to tree
         if(curr.key.y >= curr.s->p.y &&
             curr.key.y >= curr.s->q.y){
 
             //check for intersections with neighbours
             if(prev != NULL){
+
+
                 if( intersect(curr.s, prev->val.back(), aux) ){
                     intersections.push_back(aux);
                     Segment* prevSeg = prev->val.back();
 
-                    //intersect event delete segments befor that
-                    if(curr.hasPrev){
-                        st.del(curr.prevKey);
-                    }
-
-                    //cange order put in the same key
-                    st.put(aux, curr.s);
-                    st.put(aux, prevSeg);
-
                     //add both intependantly in queue
-                    eventQueue.push(Event(aux, curr.s, curr.key));
-                    eventQueue.push(Event(aux, prevSeg, prev->key));
+                    std::cout << "agregar evento de interseccion prev" << std::endl;
+                    Event e(aux);
+                    e.addSegment(curr.s, curr.key);
+                    e.addSegment(prevSeg, prev->key);
+                    eventQueue.push(e);
+                    eventQueue.push(e);
                 }
             }
             if(next != NULL){
-                if( intersect(curr.s, next->val.back(), aux) ){
+                if( intersect(curr.s, next->val.front(), aux) ){
                     intersections.push_back(aux);
                     Segment* nextSeg = next->val.front();
 
-                    //intersect event delete segments befor that
-                    if(curr.hasPrev){
-                        st.del(curr.prevKey);
-                    }
-
-                    //cange order put in the same key
-                    st.put(aux, nextSeg);
-                    st.put(aux, curr.s);
 
                     //add both intependantly in queue
-                    eventQueue.push(Event(aux, nextSeg, next->key));
-                    eventQueue.push(Event(aux, curr.s, curr.key));
+                    std::cout << "agregar evento de interseccion next" << std::endl;
+                    std::cout << "en "<<aux.x <<" "<<aux.y << std::endl;
+                    std::cout << "parents "<< next->key.x <<" y "<<curr.key.x<< std::endl;
+                    Event e(aux);
+                    e.addSegment(nextSeg, next->key);
+                    e.addSegment(curr.s, curr.key);
+                    eventQueue.push(e);
                 }
             }
 
@@ -79,6 +127,24 @@ std::vector<Point> LineIntersection::sweep_line(){
             //in case there is more than one with same key
             st.delOnly(curr.key, curr.s);
             //st.del(curr.first);
+
+            //check intersection between prev and next new neighbours
+            if(prev != NULL && next != NULL){
+                if( intersect(prev->val.back(), next->val.front(), aux) ){
+                    intersections.push_back(aux);
+                    Segment* nextSeg = next->val.front();
+                    Segment* prevSeg = prev->val.back();
+
+                    //add both intependantly in queue
+                    std::cout << "agregar evento de interseccion next" << std::endl;
+                    std::cout << "en "<<aux.x <<" "<<aux.y << std::endl;
+                    std::cout << "parents "<< next->key.x <<" y "<<prev->key.x<< std::endl;
+                    Event e(aux);
+                    e.addSegment(nextSeg, next->key);
+                    e.addSegment(prevSeg, prev->key);
+                    eventQueue.push(e);
+                }
+            }
         }
 
 
