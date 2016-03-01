@@ -122,7 +122,7 @@ int main( int argc, char* argv[] )
 
     cells->InsertNextCell(line);
 
-/*
+
     x1 = -0.771935, y1=2, x2= 1.89495, y2= 1;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
@@ -132,7 +132,7 @@ int main( int argc, char* argv[] )
     line->GetPointIds()->SetId(1, id2);
 
     cells->InsertNextCell(line);
-*/
+
 /*
     x1 = -1.63018, y1= -1.36066, x2=  1.83392, y2= 0.00875436;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);

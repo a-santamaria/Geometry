@@ -149,7 +149,10 @@ Node* RedBlackBST::deleteMax(Node* h) {
 
 void RedBlackBST::delOnly(Point key, Segment* s){
     Node* node = get(key);
+    std::cout << "key " << key.x << " " << key.y << std::endl;
+    if(!contains(key)) std::cout << "no existe" << std::endl;
     if(node != NULL){
+        std::cout << "size " << node->val.size() << std::endl;
         if(node->val.size() == 1){
             del(key);
         }else{
@@ -160,7 +163,8 @@ void RedBlackBST::delOnly(Point key, Segment* s){
             }
             node->val.erase(it);
         }
-    }
+    }else
+        std::cout << "es null" << std::endl;
 }
 
 void RedBlackBST::del(Point key) {

@@ -31,9 +31,16 @@ class Segment{
 public:
     Point p;
     Point q;
+    Point lastKey;
 
     Segment() : p(0, 0), q(0, 0) {}
-    Segment(Point _p, Point _q) : p(_p), q(_q) {}
+    Segment(Point _p, Point _q) : p(_p), q(_q) {
+        if(p.y == q.y){
+            if(p.x < p.y)   lastKey = p;
+            else            lastKey = q;
+        }else if(p.y > q.y) lastKey = p;
+        else                lastKey = q;
+    }
 
     bool operator< (const Segment &other) const;
 };

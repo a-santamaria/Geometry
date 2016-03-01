@@ -57,8 +57,9 @@ std::vector<Point> LineIntersection::sweep_line(){
                     std::cout << "agregar evento de interseccion prev" << std::endl;
                     Event e(aux);
                     e.addSegment(*first, curr.key);
+                    (*first)->lastKey = aux;
                     e.addSegment(prevSeg, prev->key);
-                    eventQueue.push(e);
+                    prevSeg->lastKey = aux;
                     eventQueue.push(e);
                 }
             }
@@ -74,16 +75,16 @@ std::vector<Point> LineIntersection::sweep_line(){
                     std::cout << "parents "<< next->key.x <<" y "<<curr.key.x<< std::endl;
                     Event e(aux);
                     e.addSegment(nextSeg, next->key);
+                    nextSeg->lastKey = aux;
                     e.addSegment(*last, curr.key);
+                    (*last)->lastKey = aux;
                     eventQueue.push(e);
                 }
             }
 
 
-        }
-        else
-        //first event of segemtne then add to tree
-        if(curr.key.y >= curr.s->p.y &&
+        }//first event of segemtne then add to tree
+        else if(curr.key.y >= curr.s->p.y &&
             curr.key.y >= curr.s->q.y){
 
             //check for intersections with neighbours
@@ -98,8 +99,9 @@ std::vector<Point> LineIntersection::sweep_line(){
                     std::cout << "agregar evento de interseccion prev" << std::endl;
                     Event e(aux);
                     e.addSegment(curr.s, curr.key);
+                    curr.s->lastKey = aux;
                     e.addSegment(prevSeg, prev->key);
-                    eventQueue.push(e);
+                    prevSeg->lastKey = aux;
                     eventQueue.push(e);
                 }
             }
@@ -115,7 +117,9 @@ std::vector<Point> LineIntersection::sweep_line(){
                     std::cout << "parents "<< next->key.x <<" y "<<curr.key.x<< std::endl;
                     Event e(aux);
                     e.addSegment(nextSeg, next->key);
+                    nextSeg->lastKey = aux;
                     e.addSegment(curr.s, curr.key);
+                    curr.s->lastKey = aux;
                     eventQueue.push(e);
                 }
             }
@@ -125,7 +129,8 @@ std::vector<Point> LineIntersection::sweep_line(){
         }
         else{ //last event of segemnte then delete from tree
             //in case there is more than one with same key
-            st.delOnly(curr.key, curr.s);
+            std::cout << "voy a borrar only" << std::endl;
+            st.delOnly(curr.s->lastKey, curr.s);
             //st.del(curr.first);
 
             //check intersection between prev and next new neighbours
@@ -141,7 +146,9 @@ std::vector<Point> LineIntersection::sweep_line(){
                     std::cout << "parents "<< next->key.x <<" y "<<prev->key.x<< std::endl;
                     Event e(aux);
                     e.addSegment(nextSeg, next->key);
+                    nextSeg->lastKey = aux;
                     e.addSegment(prevSeg, prev->key);
+                    prevSeg->lastKey = aux;
                     eventQueue.push(e);
                 }
             }
