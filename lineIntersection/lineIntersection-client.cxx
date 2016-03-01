@@ -72,12 +72,12 @@ int main( int argc, char* argv[] )
     double x1, y1, x2, y2;
     vtkCellArray *cells = vtkCellArray::New();
     cells->Initialize();
-
-    /*for(int i = 0 ; i < NumL; i++){
-        randEllipse(10, 10, 0, 0, 1, x1, y1);
+/*
+    for(int i = 0 ; i < NumL; i++){
+        randEllipse(100, 100, 0, 0, 1, x1, y1);
         points.push_back(Point(x1, y1));
         vtkIdType id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
-        randEllipse(10, 10, 0, 0, 1, x2, y2);
+        randEllipse(100, 100, 0, 0, 1, x2, y2);
         points.push_back(Point(x2, y2));
         vtkIdType id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
         cout<<"segment: "<<x1<<" "<<y1<<"    "<<x2<<" "<<y2<<endl;
@@ -90,7 +90,7 @@ int main( int argc, char* argv[] )
 
         //no se si se necesita
         colors->InsertNextTupleValue(pointColor);
-    }*/
+    }
     /*
     segment: 2.14418 -0.590303  -1.78906 -0.103435
     segment: -0.176729 -1.87436  -0.179778 1.45793
@@ -99,9 +99,16 @@ int main( int argc, char* argv[] )
     segment: 0.175602 1.11141  -1.20948 1.13638
     segment: -1.72962 -1.72707  2.87497 0.111391
     */
+    /*
+    segment: -0.718467 9.88359    0.632485 -5.86345
+    segment: -6.57177 2.92941    -0.364522 2.14119
+    segment: 1.56338 -4.17783    -1.9288 -9.00629
+    segment: 1.94885 8.15409    -8.84786 -2.81477
+    segment: 6.13274 -4.1912    1.00038 -5.64432
+    segment: 0.0602298 -2.80132    0.327202 4.5382
+*/
 
-
-    x1 =  2.14418, y1 = -0.590303, x2 = -1.78906, y2 = -0.103435;
+    x1 =  -0.718467, y1 = 9.88359, x2 = 0.632485, y2 = -5.86345;
     vtkIdType id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     vtkIdType id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
     segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
@@ -112,7 +119,7 @@ int main( int argc, char* argv[] )
     cells->InsertNextCell(line);
 
 
-    x1 = -0.176729, y1 = -1.87436, x2 = 0.3, y2 = 1.45793;
+    x1 = -6.57177, y1 = 2.92941, x2 = -0.364522, y2 = 2.14119;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
     segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
@@ -123,7 +130,7 @@ int main( int argc, char* argv[] )
     cells->InsertNextCell(line);
 
 
-    x1 = -0.771935, y1=2, x2= 1.89495, y2= 1;
+    x1 = 1.56338 , y1= -4.17783, x2= -1.9288, y2= -9.00629;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
     segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
@@ -133,30 +140,8 @@ int main( int argc, char* argv[] )
 
     cells->InsertNextCell(line);
 
-/*
-    x1 = -1.63018, y1= -1.36066, x2=  1.83392, y2= 0.00875436;
-    id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
-    id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
-    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
-    line = vtkLine::New();
-    line->GetPointIds()->SetId(0, id1);
-    line->GetPointIds()->SetId(1, id2);
 
-    cells->InsertNextCell(line);
-    */
-/*
-    x1 = 0.3, y1= 1.11141, x2=  -1.20948, y2= 0;
-    id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
-    id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
-    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
-    line = vtkLine::New();
-    line->GetPointIds()->SetId(0, id1);
-    line->GetPointIds()->SetId(1, id2);
-
-    cells->InsertNextCell(line);
-*/
-
-    x1 = -1.72962, y1= -1.72707, x2=  2.87497, y2= 0.111391;
+    x1 = 1.94885, y1= 8.15409, x2 = -8.84786, y2= -2.81477;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
     segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
@@ -166,6 +151,27 @@ int main( int argc, char* argv[] )
 
     cells->InsertNextCell(line);
 
+
+    x1 = 6.13274, y1= -4.1912, x2=  1.00038, y2= -5.64432;
+    id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
+    id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
+    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
+    line = vtkLine::New();
+    line->GetPointIds()->SetId(0, id1);
+    line->GetPointIds()->SetId(1, id2);
+
+    cells->InsertNextCell(line);
+
+
+    x1 = 0.0602298, y1= -2.80132, x2=  0.327202 , y2= 4.5382;
+    id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
+    id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
+    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
+    line = vtkLine::New();
+    line->GetPointIds()->SetId(0, id1);
+    line->GetPointIds()->SetId(1, id2);
+
+    cells->InsertNextCell(line);
 
 
 

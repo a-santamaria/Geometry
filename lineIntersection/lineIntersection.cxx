@@ -25,8 +25,8 @@ std::vector<Point> LineIntersection::sweep_line(){
         std::cout << std::endl << std::endl;
 
 
-        Node* prev = st.floor(curr.key);
-        Node* next = st.ceiling(curr.key);
+        Node* prev;
+        Node* next;
 
         //intersect event delete segments befor that
         if(curr.hasPrev){
@@ -47,6 +47,9 @@ std::vector<Point> LineIntersection::sweep_line(){
             // check intersection with new neighbours
             std::list<Segment*>::iterator first = curr.segments.begin();
             std::list<Segment*>::reverse_iterator last = curr.segments.rbegin();
+
+            prev = st.floor( (*first)->lastKey );
+            next = st.ceiling( (*last)->lastKey );
 
             if(prev != NULL){
                 if( intersect(*first, prev->val.back(), aux) ){
@@ -87,10 +90,14 @@ std::vector<Point> LineIntersection::sweep_line(){
         else if(curr.key.y >= curr.s->p.y &&
             curr.key.y >= curr.s->q.y){
 
+            prev = st.floor(curr.key);
+            next = st.ceiling(curr.key);
             //check for intersections with neighbours
             if(prev != NULL){
 
-
+                std::cout << "encontre prev" << std::endl;
+                std::cout << "prev " << (prev->val.back())->p.x << " " << (prev->val.back())->p.y << std::endl;
+                std::cout << (prev->val.back())->q.x << " " << (prev->val.back())->q.y << std::endl;
                 if( intersect(curr.s, prev->val.back(), aux) ){
                     intersections.push_back(aux);
                     Segment* prevSeg = prev->val.back();
@@ -98,10 +105,10 @@ std::vector<Point> LineIntersection::sweep_line(){
                     //add both intependantly in queue
                     std::cout << "agregar evento de interseccion prev" << std::endl;
                     Event e(aux);
-                    e.addSegment(curr.s, curr.key);
-                    curr.s->lastKey = aux;
                     e.addSegment(prevSeg, prev->key);
                     prevSeg->lastKey = aux;
+                    e.addSegment(curr.s, curr.key);
+                    curr.s->lastKey = aux;
                     eventQueue.push(e);
                 }
             }
@@ -116,10 +123,10 @@ std::vector<Point> LineIntersection::sweep_line(){
                     std::cout << "en "<<aux.x <<" "<<aux.y << std::endl;
                     std::cout << "parents "<< next->key.x <<" y "<<curr.key.x<< std::endl;
                     Event e(aux);
-                    e.addSegment(nextSeg, next->key);
-                    nextSeg->lastKey = aux;
                     e.addSegment(curr.s, curr.key);
                     curr.s->lastKey = aux;
+                    e.addSegment(nextSeg, next->key);
+                    nextSeg->lastKey = aux;
                     eventQueue.push(e);
                 }
             }
@@ -133,6 +140,8 @@ std::vector<Point> LineIntersection::sweep_line(){
             st.delOnly(curr.s->lastKey, curr.s);
             //st.del(curr.first);
 
+            prev = st.floor(curr.key);
+            next = st.ceiling(curr.key);
             //check intersection between prev and next new neighbours
             if(prev != NULL && next != NULL){
                 if( intersect(prev->val.back(), next->val.front(), aux) ){
@@ -141,7 +150,7 @@ std::vector<Point> LineIntersection::sweep_line(){
                     Segment* prevSeg = prev->val.back();
 
                     //add both intependantly in queue
-                    std::cout << "agregar evento de interseccion next" << std::endl;
+                    std::cout << "agregar evento de interseccion prev y next" << std::endl;
                     std::cout << "en "<<aux.x <<" "<<aux.y << std::endl;
                     std::cout << "parents "<< next->key.x <<" y "<<prev->key.x<< std::endl;
                     Event e(aux);
