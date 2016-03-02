@@ -17,6 +17,7 @@ public:
     Event(Point _key, Segment _s);
     Event(Point _key, Segment _s, Segment _t);
 
+    bool isFirst();
     bool operator< (const Event& other) const;
 };
 

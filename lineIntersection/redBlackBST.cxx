@@ -272,10 +272,12 @@ Node* RedBlackBST::max(Node* x) {
 }
 
 // Returns the node with largest key in the symbol table less than or equal to <tt>key</tt>.
-Node* RedBlackBST::floor(Segment key) {
+bool RedBlackBST::floor(Segment key, Segment& res) {
     if (isEmpty()) return NULL;
     Node* x = floor(root, key);
-    return x;
+    if(x == NULL) return false;
+    res = x->key;
+    return true;
 }
 
 // the largest key in the subtree rooted at x less than or equal to the given key
@@ -290,10 +292,12 @@ Node* RedBlackBST::floor(Node* x, Segment key) {
 }
 
 // Returns the node with smallest key in the symbol table greater than or equal to key
-Node* RedBlackBST::ceiling(Segment key) {
+bool RedBlackBST::ceiling(Segment key, Segment& res) {
     if (isEmpty()) return NULL;
     Node* x = ceiling(root, key);
-    return x;
+    if(x == NULL) return false;
+    res = x->key;
+    return true;
 }
 
 // the smallest key in the subtree rooted at x greater than or equal to the given key

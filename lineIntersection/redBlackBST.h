@@ -79,8 +79,8 @@ public:
     //Ordered symbol table methods.
     Segment min();
     Segment max();
-    Node* floor(Segment key);
-    Node* ceiling(Segment key);
+    bool floor(Segment key, Segment& res);
+    bool ceiling(Segment key, Segment& res);
     int rank(Segment key);
 
     void printTree();
