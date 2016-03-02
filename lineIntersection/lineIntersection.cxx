@@ -5,8 +5,9 @@
 
 
 std::vector<Point> LineIntersection::sweep_line(){
-
     std::vector<Point> intersections;
+    /*
+
 
     for(int i = 0; i < segments.size(); i++){
         eventQueue.push(Event(segments[i]->p, segments[i]));
@@ -179,7 +180,7 @@ std::vector<Point> LineIntersection::sweep_line(){
         st.printTree();
         std::cout << std::endl << std::endl;
     }
-
+*/
     return intersections;
 }
 

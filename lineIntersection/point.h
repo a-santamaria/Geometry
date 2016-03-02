@@ -1,7 +1,12 @@
 #ifndef POINT_H
 #define POINT_H
 
-#define eps 1e-9
+#include<cmath>
+
+
+#define EPS 1e-9
+#define INF DBL_MAX
+
 
 class Point{
 public:
@@ -28,20 +33,21 @@ public:
 };
 
 class Segment{
+private:
+    double a;
+    double b;
+    double c;
+    double getXInSweepLine() const;
+
 public:
     Point p;
     Point q;
     Point lastKey;
 
-    Segment() : p(0, 0), q(0, 0) {}
-    Segment(Point _p, Point _q) : p(_p), q(_q) {
-        if(p.y == q.y){
-            if(p.x < p.y)   lastKey = p;
-            else            lastKey = q;
-        }else if(p.y > q.y) lastKey = p;
-        else                lastKey = q;
-    }
+    static double sweep_lineY;
 
+    Segment() : p(0, 0), q(0, 0) {}
+    Segment(Point _p, Point _q);
     bool operator< (const Segment &other) const;
 };
 

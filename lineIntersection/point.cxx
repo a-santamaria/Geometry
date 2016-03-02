@@ -2,9 +2,10 @@
 #include <iostream>
 #include <cfloat>
 #include <cmath>
+#include <cassert>
 #include "point.h"
 
-using namespace std;
+double Segment::sweep_lineY = INF;
 
 bool Point::operator< (const Point& other) const{
     if(x == other.x)
@@ -34,8 +35,26 @@ Point Point::operator+ (const Point& other){
     return p;
 }
 
+Segment::Segment(Point _p, Point _q) : p(_p), q(_q) {
+
+    if(fabs(p.x - q.x) < EPS){//vertical line
+        a = 1.0;
+        b = 0.0;
+        c = -p.x;
+    }else{
+        a = -(double) (p.y - q.y) / (p.x - q.x);
+        b = 1.0;
+        c = -(double) (a * p.x) - p.y;
+    }
+}
+
 bool Segment::operator< (const Segment& other) const{
-    return p.y < other.p.y;
+    assert(Segment::sweep_lineY != INF);
+    return this->getXInSweepLine() < other.getXInSweepLine();
+}
+
+double Segment::getXInSweepLine() const{
+    return - ( (b*Segment::sweep_lineY) - c ) / a;
 }
 
 double randF(){
