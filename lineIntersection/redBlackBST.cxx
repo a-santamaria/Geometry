@@ -5,14 +5,8 @@
 #include <list>
 #include <queue>
 
-Node::Node(Point _key, Segment* seg, bool _color, int _N) :
+Node::Node(Segment _key, bool _color, int _N) :
     key(_key), color(_color), N(_N) {
-    val.push_front(seg);
-    this->left = this->right = NULL;
-}
-
-Node::Node(Point _key, std::list<Segment*> _val, bool _color, int _N) :
-    key(_key), val(_val), color(_color), N(_N) {
     this->left = this->right = NULL;
 }
 
@@ -42,44 +36,37 @@ bool RedBlackBST::isEmpty() {
 *  Standard BST search.
 ***************************************************************************/
 
-Node* RedBlackBST::get(Point key) {
+Node* RedBlackBST::get(Segment key) {
     return get(root, key);
 }
 
-Node* RedBlackBST::get(Node* x, Point key) {
+Node* RedBlackBST::get(Node* x, Segment key) {
     while (x != NULL) {
-        if  (key == x->key) return x;
         if  (key < x->key)  x = x->left;
-        else                x = x->right;
+        if  (key > x->key)  x = x->right;
+        else                return x;
     }
-
     return NULL;
 }
 
-bool RedBlackBST::contains(Point key) {
+bool RedBlackBST::contains(Segment key) {
     return get(key) != NULL;
 }
 
 /***************************************************************************
 *  Red-black tree insertion.
 ***************************************************************************/
-void RedBlackBST::put(Point key, Segment* val) {
-    if (val == NULL) {
-        del(key);
-        return;
-    }
-
-    root = put(root, key, val);
+void RedBlackBST::put(Segment key) {
+    root = put(root, key);
     root->color = BLACK;
 }
 
-Node* RedBlackBST::put(Node* h, Point key, Segment* val) {
-    if (h == NULL) return new Node(key, val, RED, 1);
+Node* RedBlackBST::put(Node* h, Segment key) {
+    if (h == NULL) return new Node(key, RED, 1);
 
-    //TODO no se si push back de una o mirar
-    if       (key == h->key) h->val.push_back(val);
-    else if  (key < h->key)  h->left  = put(h->left,  key, val);
-    else                     h->right = put(h->right, key, val);
+    if       (key < h->key)  h->left  = put(h->left,  key);
+    else if  (key > h->key)  h->right = put(h->right, key);
+    else                     h->key = key;
 
     // fix-up any right-leaning links
     if (isRed(h->right) && !isRed(h->left))       h = rotateLeft(h);
@@ -147,27 +134,8 @@ Node* RedBlackBST::deleteMax(Node* h) {
     return balance(h);
 }
 
-void RedBlackBST::delOnly(Point key, Segment* s){
-    Node* node = get(key);
-    std::cout << "key " << key.x << " " << key.y << std::endl;
-    if(!contains(key)) std::cout << "no existe" << std::endl;
-    if(node != NULL){
-        std::cout << "size " << node->val.size() << std::endl;
-        if(node->val.size() == 1){
-            del(key);
-        }else{
-            std::list<Segment*>::iterator it;
-            for(it = node->val.begin(); it != node->val.end(); it++){
-                if(*it == s)
-                    break;
-            }
-            node->val.erase(it);
-        }
-    }else
-        std::cout << "es null" << std::endl;
-}
 
-void RedBlackBST::del(Point key) {
+void RedBlackBST::del(Segment key) {
     if (!contains(key)) return;
 
     // if both children of root are black, set root to red
@@ -178,7 +146,7 @@ void RedBlackBST::del(Point key) {
     if (!isEmpty()) root->color = BLACK;
 }
 
-Node* RedBlackBST::del(Node* h, Point key) {
+Node* RedBlackBST::del(Node* h, Segment key) {
 
     if (key < h->key)  {
         if (!isRed(h->left) && !isRed(h->left->left))
@@ -195,7 +163,6 @@ Node* RedBlackBST::del(Node* h, Point key) {
         if (key == h->key) {
             Node* x = min(h->right);
             h->key = x->key;
-            h->val = x->val;
 
             h->right = deleteMin(h->right);
         }
@@ -281,7 +248,7 @@ Node* RedBlackBST::balance(Node* h) {
 ***************************************************************************/
 
 // Returns the smallest key in the symbol table.
-Point RedBlackBST::min() {
+Segment RedBlackBST::min() {
     assert (!isEmpty());
     return min(root)->key;
 }
@@ -293,7 +260,7 @@ Node* RedBlackBST::min(Node* x) {
 }
 
 // Returns the largest key in the symbol table.
-Point RedBlackBST::max() {
+Segment RedBlackBST::max() {
     assert (!isEmpty());
     return max(root)->key;
 }
@@ -305,14 +272,14 @@ Node* RedBlackBST::max(Node* x) {
 }
 
 // Returns the node with largest key in the symbol table less than or equal to <tt>key</tt>.
-Node* RedBlackBST::floor(Point key) {
+Node* RedBlackBST::floor(Segment key) {
     if (isEmpty()) return NULL;
     Node* x = floor(root, key);
     return x;
 }
 
 // the largest key in the subtree rooted at x less than or equal to the given key
-Node* RedBlackBST::floor(Node* x, Point key) {
+Node* RedBlackBST::floor(Node* x, Segment key) {
     if (x == NULL) return NULL;
 
     if (key == x->key) return x;
@@ -323,14 +290,14 @@ Node* RedBlackBST::floor(Node* x, Point key) {
 }
 
 // Returns the node with smallest key in the symbol table greater than or equal to key
-Node* RedBlackBST::ceiling(Point key) {
+Node* RedBlackBST::ceiling(Segment key) {
     if (isEmpty()) return NULL;
     Node* x = ceiling(root, key);
     return x;
 }
 
 // the smallest key in the subtree rooted at x greater than or equal to the given key
-Node* RedBlackBST::ceiling(Node* x, Point key) {
+Node* RedBlackBST::ceiling(Node* x, Segment key) {
     if (x == NULL) return NULL;
     if (key == x->key) return x;
     if (key > x->key)  return ceiling(x->right, key);
@@ -340,12 +307,12 @@ Node* RedBlackBST::ceiling(Node* x, Point key) {
 }
 
 // Return the number of keys in the symbol table strictly less than key.
-int RedBlackBST::rank(Point key) {
+int RedBlackBST::rank(Segment key) {
     return rank(key, root);
 }
 
 // number of keys less than key in the subtree rooted at x
-int RedBlackBST::rank(Point key, Node* x) {
+int RedBlackBST::rank(Segment key, Node* x) {
     if (x == NULL) return 0;
     if      (key < x->key) return rank(key, x->left);
     else if (key > x->key) return 1 + size(x->left) + rank(key, x->right);
@@ -371,7 +338,7 @@ void RedBlackBST::printTree(){
         if(curr.first != NULL){
             q.push(std::make_pair(curr.first->left, curr.second+1));
             q.push(std::make_pair(curr.first->right, curr.second+1));
-            std::cout << curr.first->key.x << " <-> ";
+            std::cout << "("<< curr.first->key.p.x << ", "<<curr.first->key.p.x<<") <-> ";
         }
         else
             std::cout << " NULL  <-> " ;

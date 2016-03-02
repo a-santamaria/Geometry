@@ -42,13 +42,14 @@ private:
 public:
     Point p;
     Point q;
-    Point lastKey;
 
     static double sweep_lineY;
 
     Segment() : p(0, 0), q(0, 0) {}
     Segment(Point _p, Point _q);
     bool operator< (const Segment &other) const;
+    bool operator> (const Segment &other) const;
+    bool operator== (const Segment &other) const;
 };
 
 double randF();

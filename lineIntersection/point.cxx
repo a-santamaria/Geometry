@@ -53,6 +53,15 @@ bool Segment::operator< (const Segment& other) const{
     return this->getXInSweepLine() < other.getXInSweepLine();
 }
 
+bool Segment::operator> (const Segment& other) const{
+    assert(Segment::sweep_lineY != INF);
+    return this->getXInSweepLine() > other.getXInSweepLine();
+}
+
+bool Segment::operator== (const Segment &other) const{
+    return (p == other.p && q == other.q);
+}
+
 double Segment::getXInSweepLine() const{
     return - ( (b*Segment::sweep_lineY) - c ) / a;
 }
