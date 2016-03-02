@@ -3,6 +3,21 @@
 #include <iostream>
 #include <cstdlib>
 
+Event::Event(Point _key, Segment _s) : key(_key), isIntersection(false) {
+    segments[0] = _s;
+}
+
+Event::Event(Point _key, Segment _s, Segment _t) : key(_key),
+            isIntersection(true) {
+    segments[0] = _s;
+    segments[1] = _t;
+}
+
+bool Event::operator< (const Event& other) const{
+    if(key.y == other.key.y) return key.x < other.key.x;
+    return key.y < other.key.y;
+}
+
 
 std::vector<Point> LineIntersection::sweep_line(){
     std::vector<Point> intersections;
@@ -184,24 +199,24 @@ std::vector<Point> LineIntersection::sweep_line(){
     return intersections;
 }
 
-bool LineIntersection::intersect(const Segment* s, const Segment* t, Point& p){
+bool LineIntersection::intersect(const Segment& s, const Segment& t, Point& p){
 
-    if( ccw(s->p, s->q, t->p) == ccw(s->p, s->q, t->q) ||
-        ccw(t->p, t->q, s->p) == ccw(t->p, t->q, s->q)    )
+    if( ccw(s.p, s.q, t.p) == ccw(s.p, s.q, t.q) ||
+        ccw(t.p, t.q, s.p) == ccw(t.p, t.q, s.q)    )
         return false;
     //TODO falta colineales y extremos
 
-    double den = toVec(s->p, s->q).crossMag(toVec(t->p, t->q));
+    double den = toVec(s.p, s.q).crossMag(toVec(t.p, t.q));
 
-    double num = toVec(s->p, t->p).crossMag(toVec(t->p, t->q)) * den;
+    double num = toVec(s.p, t.p).crossMag(toVec(t.p, t.q)) * den;
 
 
     double ss = num / (den*den);
 
-    p.x = (s->q.x - s->p.x);
-    p.y = (s->q.y - s->p.y);
+    p.x = (s.q.x - s.p.x);
+    p.y = (s.q.y - s.p.y);
     p.x = p.x*ss;
     p.y = p.y*ss;
-    p = p + s->p;
+    p = p + s.p;
     return true;
 }

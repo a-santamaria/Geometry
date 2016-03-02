@@ -54,7 +54,7 @@ int main( int argc, char* argv[] )
 
     srand (time(NULL));
     vector<Point> points;
-    vector<Segment*> segments;
+    vector<Segment> segments;
 
     vtkSmartPointer<vtkPoints> pointsVTK =
       vtkSmartPointer<vtkPoints>::New();
@@ -81,7 +81,7 @@ int main( int argc, char* argv[] )
         points.push_back(Point(x2, y2));
         vtkIdType id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
         cout<<"segment: x1="<<x1<<", y1="<<y1<<", x2="<<x2<<", y2="<<y2<<endl;
-        segments.push_back( new Segment(Point(x1, y1), Point(x2, y2)) );
+        segments.push_back( Segment(Point(x1, y1), Point(x2, y2)) );
         vtkLine *line = vtkLine::New();
         line->GetPointIds()->SetId(0, id1);
         line->GetPointIds()->SetId(1, id2);
@@ -119,7 +119,7 @@ int main( int argc, char* argv[] )
     x1=6.28214, y1=0.156946, x2=1.28, y2=-5.85895;
     vtkIdType id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     vtkIdType id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
-    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
+    segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
     vtkLine *line = vtkLine::New();
     line->GetPointIds()->SetId(0, id1);
     line->GetPointIds()->SetId(1, id2);
@@ -130,7 +130,7 @@ int main( int argc, char* argv[] )
     x1=6.49534, y1=5.09243, x2=0.263176, y2=-6.78202;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
-    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
+    segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
     line = vtkLine::New();
     line->GetPointIds()->SetId(0, id1);
     line->GetPointIds()->SetId(1, id2);
@@ -141,7 +141,7 @@ int main( int argc, char* argv[] )
     x1=-1.04893, y1=7.11772, x2=0.601029, y2=7.46132;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
-    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
+    segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
     line = vtkLine::New();
     line->GetPointIds()->SetId(0, id1);
     line->GetPointIds()->SetId(1, id2);
@@ -152,7 +152,7 @@ int main( int argc, char* argv[] )
     x1=4.56062, y1=-7.7804, x2=-5.08734, y2=-2.28247;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
-    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
+    segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
     line = vtkLine::New();
     line->GetPointIds()->SetId(0, id1);
     line->GetPointIds()->SetId(1, id2);
@@ -163,7 +163,7 @@ int main( int argc, char* argv[] )
     x1=-6.79473, y1=4.68961, x2=8.64915, y2=-1.05621;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
-    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
+    segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
     line = vtkLine::New();
     line->GetPointIds()->SetId(0, id1);
     line->GetPointIds()->SetId(1, id2);
@@ -174,7 +174,7 @@ int main( int argc, char* argv[] )
     x1=7.86563, y1=-0.173118, x2=-2.88761, y2=4.95895;
     id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
-    segments.push_back(new Segment(Point(x1, y1), Point(x2, y2)));
+    segments.push_back(Segment(Point(x1, y1), Point(x2, y2)));
     line = vtkLine::New();
     line->GetPointIds()->SetId(0, id1);
     line->GetPointIds()->SetId(1, id2);
