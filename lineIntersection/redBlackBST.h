@@ -21,14 +21,12 @@
 
 class Node {
 public:
-    Point key;            // key
-    std::list<Segment*> val; // associated data
+    Segment key;          // key and data
     Node *left, *right;   // links to left and right subtrees
     bool color;           // color of parent link
     int N;                // subtree count
 
-    Node(Point _key, Segment* seg, bool _color, int _N);
-    Node(Point _key, std::list<Segment*> _val, bool _color, int _N);
+    Node(Segment _key, bool _color, int _N);
 };
 
 class RedBlackBST {
@@ -41,13 +39,13 @@ private:
 
     bool isRed(Node* x);
     int size(Node* x);
-    Node* get(Node* x, Point key);
-    Node* put(Node* h, Point key, Segment* val);
+    Node* get(Node* x, Segment key);
+    Node* put(Node* h, Segment key);
 
     //Red-black tree deletion.
     Node* deleteMin(Node* h);
     Node* deleteMax(Node* h);
-    Node* del(Node* h, Point key);
+    Node* del(Node* h, Segment key);
 
     //Red-black tree helper functions.
     Node* rotateRight(Node* h);
@@ -60,31 +58,31 @@ private:
     //Ordered symbol table methods.
     Node* min(Node* x);
     Node* max(Node* x);
-    Node* floor(Node* x, Point key);
-    Node* ceiling(Node* x, Point key);
-    int rank(Point key, Node* x);
+    Node* floor(Node* x, Segment key);
+    Node* ceiling(Node* x, Segment key);
+    int rank(Segment key, Node* x);
 
 
 public:
     RedBlackBST();
     int size();
     bool isEmpty();
-    Node* get(Point key);
-    bool contains(Point key);
-    void put(Point key, Segment* val);
+    Node* get(Segment key);
+    bool contains(Segment key);
+    void put(Segment key);
+    void swapOrder(Segment first, Segment second);
 
     //Red-black tree deletion.
     void deleteMin();
     void deleteMax();
-    void del(Point key);
-    void delOnly(Point key, Segment* s);
+    void del(Segment key);
 
     //Ordered symbol table methods.
-    Point min();
-    Point max();
-    Node* floor(Point key);
-    Node* ceiling(Point key);
-    int rank(Point key);
+    Segment min();
+    Segment max();
+    bool floor(Segment key, Segment& res);
+    bool ceiling(Segment key, Segment& res);
+    int rank(Segment key);
 
     void printTree();
 };
