@@ -72,7 +72,7 @@ int main( int argc, char* argv[] )
     double x1, y1, x2, y2;
     vtkCellArray *cells = vtkCellArray::New();
     cells->Initialize();
-/*
+
     for(int i = 0 ; i < NumL; i++){
         randEllipse(100, 100, 0, 0, 1, x1, y1);
         points.push_back(Point(x1, y1));
@@ -115,7 +115,7 @@ int main( int argc, char* argv[] )
     segment: x1=-6.79473, y1=4.68961, x2=8.64915, y2=-1.05621
     segment: x1=7.86563, y1=-0.173118, x2=-2.88761, y2=4.95895
 */
-
+/*
     x1=6.28214, y1=0.156946, x2=1.28, y2=-5.85895;
     vtkIdType id1 = pointsVTK->InsertNextPoint (x1, y1, 0);
     vtkIdType id2 = pointsVTK->InsertNextPoint (x2, y2, 0);
@@ -180,7 +180,7 @@ int main( int argc, char* argv[] )
     line->GetPointIds()->SetId(1, id2);
 
     cells->InsertNextCell(line);
-
+*/
 
     //TODO change clock_t for the other library
 

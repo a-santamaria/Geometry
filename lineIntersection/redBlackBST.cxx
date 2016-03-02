@@ -43,8 +43,10 @@ Node* RedBlackBST::get(Segment key) {
 Node* RedBlackBST::get(Node* x, Segment key) {
     while (x != NULL) {
         if  (key < x->key)  x = x->left;
-        if  (key > x->key)  x = x->right;
-        else                return x;
+        else if  (key > x->key)  x = x->right;
+        else {
+            return x;
+        }
     }
     return NULL;
 }
@@ -75,6 +77,49 @@ Node* RedBlackBST::put(Node* h, Segment key) {
     h->N = size(h->left) + size(h->right) + 1;
 
     return h;
+}
+
+void RedBlackBST::swapOrder(Segment first, Segment second){
+    std::cout << "--------------.>>> voy a intercabbiar" << std::endl;
+    Node* nodeF = get(first);
+    //TODO problema aca porque veces es null... nunca deberia ser null
+    if(nodeF == NULL) return;
+    Node* nodeHi = NULL;
+    Node* nodeLo = NULL;
+    if(nodeF->right != NULL) Node* nodeHi = min(nodeF->right);
+    if(nodeF->left != NULL) Node* nodeLo = max(nodeF->left);
+    if(nodeHi != NULL){
+        if(nodeF->key.equals(first)){
+            if(nodeHi->key.equals(second)){
+                nodeF->key = second;
+                nodeHi->key = first;
+                return;
+            }
+        }else{
+            if(nodeHi->key.equals(first)){
+                nodeF->key = first;
+                nodeHi->key = second;
+                return;
+            }
+        }
+    }
+
+    if(nodeLo != NULL){
+        if(nodeF->key.equals(first)){
+            if(nodeLo->key.equals(second)){
+                nodeF->key = second;
+                nodeLo->key = first;
+                return;
+            }
+        }else{
+            if(nodeLo->key.equals(first)){
+                nodeF->key = first;
+                nodeLo->key = second;
+                return;
+            }
+        }
+    }
+    //printTree();
 }
 
 /***************************************************************************
@@ -137,33 +182,38 @@ Node* RedBlackBST::deleteMax(Node* h) {
 
 void RedBlackBST::del(Segment key) {
     if (!contains(key)) return;
-
     // if both children of root are black, set root to red
     if (!isRed(root->left) && !isRed(root->right))
         root->color = RED;
-
     root = del(root, key);
     if (!isEmpty()) root->color = BLACK;
 }
 
 Node* RedBlackBST::del(Node* h, Segment key) {
-
+    assert(h != NULL);
     if (key < h->key)  {
-        if (!isRed(h->left) && !isRed(h->left->left))
-            h = moveRedLeft(h);
-        h->left = del(h->left, key);
+        //TODO este if no deberia ir
+        if(h->left != NULL){
+            if (!isRed(h->left) && !isRed(h->left->left)){
+                h = moveRedLeft(h);
+            }
+            h->left = del(h->left, key);
+        }
     }
     else {
         if (isRed(h->left))
             h = rotateRight(h);
         if (key == h->key && h->right == NULL)
             return NULL;
-        if (!isRed(h->right) && !isRed(h->right->left))
-            h = moveRedRight(h);
+        //TODO este if no deberia ir
+        if(h->right != NULL){
+            if (!isRed(h->right) && !isRed(h->right->left)){
+                h = moveRedRight(h);
+            }
+        }
         if (key == h->key) {
             Node* x = min(h->right);
             h->key = x->key;
-
             h->right = deleteMin(h->right);
         }
         else h->right = del(h->right, key);
@@ -284,7 +334,7 @@ bool RedBlackBST::floor(Segment key, Segment& res) {
 Node* RedBlackBST::floor(Node* x, Segment key) {
     if (x == NULL) return NULL;
 
-    if (key == x->key) return x;
+    if (key == x->key) return floor(x->left, key);
     if (key < x->key)  return floor(x->left, key);
     Node* t = floor(x->right, key);
     if (t != NULL) return t;
@@ -303,7 +353,8 @@ bool RedBlackBST::ceiling(Segment key, Segment& res) {
 // the smallest key in the subtree rooted at x greater than or equal to the given key
 Node* RedBlackBST::ceiling(Node* x, Segment key) {
     if (x == NULL) return NULL;
-    if (key == x->key) return x;
+
+    if (key == x->key) return ceiling(x->right, key);
     if (key > x->key)  return ceiling(x->right, key);
     Node* t = ceiling(x->left, key);
     if (t != NULL) return t;
@@ -342,7 +393,8 @@ void RedBlackBST::printTree(){
         if(curr.first != NULL){
             q.push(std::make_pair(curr.first->left, curr.second+1));
             q.push(std::make_pair(curr.first->right, curr.second+1));
-            std::cout << "("<< curr.first->key.p.x << ", "<<curr.first->key.p.x<<") <-> ";
+            std::cout << "p ("<< curr.first->key.p.x << ", "<<curr.first->key.p.y<<")";
+            std::cout << " q ("<< curr.first->key.q.x << ", "<<curr.first->key.q.y<<") <->";
         }
         else
             std::cout << " NULL  <-> " ;

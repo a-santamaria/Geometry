@@ -42,28 +42,44 @@ Segment::Segment(Point _p, Point _q) : p(_p), q(_q) {
         b = 0.0;
         c = -p.x;
     }else{
-        a = -(double) (p.y - q.y) / (p.x - q.x);
+        /*a = -(double) (p.y - q.y) / (p.x - q.x);
         b = 1.0;
-        c = -(double) (a * p.x) - p.y;
+        c = -(double) (a * p.x) - p.y;*/
+        a = p.y - q.y;
+        b = q.x - p.x;
+        c = (p.x - q.x)*p.y + (q.y-p.y)*p.x;
+        /*std::cout << "soy " << std::endl;
+        std::cout << p.x << " " <<  p.y << std::endl;
+        std::cout << q.x << " " <<  q.y << std::endl;
+        std::cout << "a "<<a<<" b "<< b<<" c "<<c << std::endl;
+        std::cout << "-------------------------" << std::endl;*/
+
     }
 }
 
 bool Segment::operator< (const Segment& other) const{
     assert(Segment::sweep_lineY != INF);
-    return this->getXInSweepLine() < other.getXInSweepLine();
+    return other.getXInSweepLine() - this->getXInSweepLine() > EPS;
 }
 
 bool Segment::operator> (const Segment& other) const{
-    assert(Segment::sweep_lineY != INF);
-    return this->getXInSweepLine() > other.getXInSweepLine();
+    assert(Segment::sweep_lineY != INF);    
+    return this->getXInSweepLine() - other.getXInSweepLine() > EPS;
 }
 
 bool Segment::operator== (const Segment &other) const{
-    return (p == other.p && q == other.q);
+    return fabs(other.getXInSweepLine() - this->getXInSweepLine()) <= EPS;
+}
+
+bool Segment::operator!= (const Segment &other) const{
+    return !(*this == other);
 }
 
 double Segment::getXInSweepLine() const{
-    return - ( (b*Segment::sweep_lineY) - c ) / a;
+    //std::cout << "a "<<a<<" b "<< b<<" c "<<c << std::endl;
+    double test = (b*Segment::sweep_lineY);
+    test = -test - c;
+    return test / a;
 }
 
 double randF(){

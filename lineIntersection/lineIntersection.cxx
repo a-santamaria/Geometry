@@ -39,10 +39,14 @@ std::vector<Point> LineIntersection::sweep_line(){
         Event curr = eventQueue.top();
         eventQueue.pop();
 
+        //update sweep_lineY coordinate
+        Segment::sweep_lineY = curr.key.y;
+
         std::cout << "(((((((((((evento)))))))))))" << std::endl;
         std::cout << curr.key.x <<"  "<<curr.key.y << std::endl;
         std::cout << std::endl << std::endl;
 
+        std::cout << "/* sweep line y */   " << Segment::sweep_lineY << std::endl;
 
         Segment prev;
         Segment next;
@@ -50,33 +54,91 @@ std::vector<Point> LineIntersection::sweep_line(){
         //intersect event delete segments befor that
         if(curr.isIntersection){
             std::cout << "****************soy evento de inerseccion************" << std::endl;
+            std::cout << "en: " << curr.key.x << " " << curr.key.y << std::endl;
 
+            std::cout << "antes de swap" << std::endl;
+            //swap order of segements in status tree st
+            st.swapOrder(curr.segments[0], curr.segments[1]);
 
+            std::cout << "despues de swap" << std::endl;
+            //check intersections with new neighbours
+            if( st.floor(curr.segments[1], prev) ){
+                /*std::cout << "encontre prev" << std::endl;
+                std::cout << prev.p.x << " " <<  prev.p.y << std::endl;
+                std::cout << prev.q.x << " " <<  prev.q.y << std::endl;
+                std::cout << "yo" << std::endl;
+                std::cout << curr.segments[1].p.x << " " <<  curr.segments[1].p.y << std::endl;
+                std::cout << curr.segments[1].q.x << " " <<  curr.segments[1].q.y << std::endl;
+                */
+                if( intersect(curr.segments[1], prev, aux) &&
+                    aux.y <= Segment::sweep_lineY ) {
+                    //add intersection
+                    intersections.push_back(aux);
+                    std::cout << "agrege evento con prev en ";
+                    std::cout << aux.x << " " << aux.y << std::endl;
+                    //add intersection event
+                    eventQueue.push(Event(aux, prev, curr.segments[1]));
+                }
+
+            }
+
+            if( st.ceiling(curr.segments[0], next) ){
+                /*std::cout << "encontre next" << std::endl;
+                std::cout << next.p.x << " " <<  next.p.y << std::endl;
+                std::cout << next.q.x << " " <<  next.q.y << std::endl;
+                std::cout << "yo" << std::endl;
+                std::cout << curr.segments[0].p.x << " " <<  curr.segments[0].p.y << std::endl;
+                std::cout << curr.segments[0].q.x << " " <<  curr.segments[0].q.y << std::endl;
+                */
+                if( intersect(curr.segments[0], next, aux) &&
+                    aux.y <= Segment::sweep_lineY ) {
+                    //add intersection
+                    intersections.push_back(aux);
+                    std::cout << "agrege evento con next";
+                    std::cout << aux.x << " " << aux.y << std::endl;
+                    //add intersection event
+                    eventQueue.push(Event(aux, curr.segments[0], next));
+                }
+
+            }
 
 
 
         }//first event of segemtne then add to tree
         else if(curr.isFirst()) {
-
+            std::cout << "---------------es first----------" << std::endl;
             //check for intersections with neighbours
             if( st.floor(curr.segments[0], prev) ){
                 if( intersect(curr.segments[0], prev, aux) &&
                     aux.y <= Segment::sweep_lineY ) {
+                        //add intersection
+                        intersections.push_back(aux);
+
+                        //add intersection event
+                        eventQueue.push(Event(aux, prev, curr.segments[0]));
 
                 }
             }
             if( st.ceiling(curr.segments[0], next) ){
                 if( intersect(curr.segments[0], next, aux) &&
                     aux.y <= Segment::sweep_lineY ) {
+                        //add intersection
+                        intersections.push_back(aux);
 
+                        //add intersection event
+                        eventQueue.push(Event(aux, curr.segments[0], next));
                 }
             }
             //add to the tree
             st.put(curr.segments[0]);
         }
         else{ //last event of segemnte then delete from tree
+            //std::cout << "soy last" << std::endl;
+            std::cout << "es salida" << std::endl;
+            /*TODO aca hay problemas al borrar aveces no exite el nodo
+            siempre deberia exitir
+            */
             st.del(curr.segments[0]);
-
             //check intersection between prev and next new neighbours
             if( st.floor(curr.segments[0], prev) &&
                 st.ceiling(curr.segments[0], next) ){
@@ -89,12 +151,12 @@ std::vector<Point> LineIntersection::sweep_line(){
                     //add intersection event
                     std::cout << "agregar evento de interseccion prev y next" << std::endl;
                     std::cout << "en "<<aux.x <<" "<<aux.y << std::endl;
-                    Event e(aux, prev, next);
-                    eventQueue.push(e);
+                    //add intersection event
+                    eventQueue.push(Event(aux, prev, next));
                 }
             }
         }
-        st.printTree();
+        //st.printTree();
         std::cout << std::endl << std::endl;
     }
 

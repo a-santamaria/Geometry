@@ -70,6 +70,7 @@ public:
     Node* get(Segment key);
     bool contains(Segment key);
     void put(Segment key);
+    void swapOrder(Segment first, Segment second);
 
     //Red-black tree deletion.
     void deleteMin();

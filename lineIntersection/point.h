@@ -4,7 +4,7 @@
 #include<cmath>
 
 
-#define EPS 1e-9
+#define EPS 1e-12
 #define INF DBL_MAX
 
 
@@ -50,6 +50,10 @@ public:
     bool operator< (const Segment &other) const;
     bool operator> (const Segment &other) const;
     bool operator== (const Segment &other) const;
+    bool operator!= (const Segment &other) const;
+    bool equals(const Segment& other){
+        return p == other.p && q == other.q;
+    }
 };
 
 double randF();
