@@ -34,13 +34,13 @@ public:
 
 class Segment{
 public:
-    mutable double a;
-    mutable double b;
-    mutable double c;
+     double a;
+     double b;
+     double c;
     double getXInSweepLine() const;
 
-    mutable Point p;
-    mutable Point q;
+     Point p;
+     Point q;
 
     static double sweep_lineY;
 

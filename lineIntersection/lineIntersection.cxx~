@@ -237,11 +237,11 @@ void LineIntersection::swapOrder(std::set<Segment>& st, Segment first,
 
          
             (*itf).a = second.a;
-            (*itf).b = second.b;
-            (*itf).c = second.c;
+            (*itf).a = second.b;
+            (*itf).a = second.c;
 
-            (*itf).p = second.p;
-            (*itf).q = second.q;
+            (*itf).a = second.p;
+            (*itf).a = second.q;
             assert(! ((Segment)*itf).equals(first));
             assert(! ((Segment)*itf).equals((Segment)*itOther));
         }else if( ((Segment)(*itOther)).equals(first) ){
@@ -255,11 +255,11 @@ void LineIntersection::swapOrder(std::set<Segment>& st, Segment first,
 
          
             (*itf).a = first.a;
-            (*itf).b = first.b;
-            (*itf).c = first.c;
+            (*itf).a = first.b;
+            (*itf).a = first.c;
 
-            (*itf).p = first.p;
-            (*itf).q = first.q;
+            (*itf).a = first.p;
+            (*itf).a = first.q;
 
             assert(! ((Segment)*itf).equals(second));
             assert(! ((Segment)*itf).equals((Segment)*itOther));
@@ -282,11 +282,11 @@ void LineIntersection::swapOrder(std::set<Segment>& st, Segment first,
 
 				     
 				        (*itf).a = second.a;
-				        (*itf).b = second.b;
-				        (*itf).c = second.c;
+				        (*itf).a = second.b;
+				        (*itf).a = second.c;
 
-				        (*itf).p = second.p;
-				        (*itf).q = second.q;
+				        (*itf).a = second.p;
+				        (*itf).a = second.q;
                 assert(! ((Segment)*itf).equals(first));
                 assert(! ((Segment)*itf).equals((Segment)*itOther));
             }else if( ((Segment)(*itOther)).equals(first) ){
@@ -299,11 +299,11 @@ void LineIntersection::swapOrder(std::set<Segment>& st, Segment first,
 
 				     
 				        (*itf).a = first.a;
-				        (*itf).b = first.b;
-				        (*itf).c = first.c;
+				        (*itf).a = first.b;
+				        (*itf).a = first.c;
 
-				        (*itf).p = first.p;
-				        (*itf).q = first.q;
+				        (*itf).a = first.p;
+				        (*itf).a = first.q;
                 assert(! ((Segment)*itf).equals(second));
                 assert(! ((Segment)*itf).equals((Segment)*itOther));
             }
