@@ -4,6 +4,7 @@
 #include <queue>
 #include <vector>
 #include <list>
+#include <set>
 #include "point.h"
 
 class Event{
@@ -25,7 +26,10 @@ class LineIntersection{
 private:
     std::vector< Segment > segments;
     std::priority_queue< Event > eventQueue;
+    void swapOrder(std::set<Segment>& st, Segment first, Segment second,
+                   Segment* prev, Segment* next);
     bool intersect(const Segment& s, const Segment& t, Point& p);
+    void encontrarPrevNext(Segment& s, Segment* prev, Segment* next, std::set<Segment>& st);
 
 public:
     LineIntersection();

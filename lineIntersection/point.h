@@ -33,19 +33,25 @@ public:
 };
 
 class Segment{
-private:
+public:
     double a;
     double b;
     double c;
     double getXInSweepLine() const;
 
-public:
     Point p;
     Point q;
 
     static double sweep_lineY;
 
     Segment() : p(0, 0), q(0, 0) {}
+    Segment(const Segment& _s){
+        a = _s.a;
+        b = _s.b;
+        c = _s.c;
+        p = _s.p;
+        q = _s.q;
+    }
     Segment(Point _p, Point _q);
     bool operator< (const Segment &other) const;
     bool operator> (const Segment &other) const;

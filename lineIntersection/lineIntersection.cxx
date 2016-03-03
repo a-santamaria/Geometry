@@ -2,6 +2,8 @@
 #include "redBlackBST.h"
 #include <iostream>
 #include <cstdlib>
+#include <cassert>
+#include <set>
 
 Event::Event(Point _key, Segment _s) : key(_key), isIntersection(false) {
     segments[0] = _s;
@@ -32,7 +34,8 @@ std::vector<Point> LineIntersection::sweep_line(){
         eventQueue.push(Event(segments[i].q, segments[i]));
     }
 
-    RedBlackBST st;
+    //status tree
+    std::set<Segment> st;
     Point aux;
 
     while(!eventQueue.empty()){
@@ -48,56 +51,57 @@ std::vector<Point> LineIntersection::sweep_line(){
 
         std::cout << "/* sweep line y */   " << Segment::sweep_lineY << std::endl;
 
-        Segment prev;
-        Segment next;
+        Segment* prev;
+        Segment* next;
 
         //intersect event delete segments befor that
         if(curr.isIntersection){
             std::cout << "****************soy evento de inerseccion************" << std::endl;
             std::cout << "en: " << curr.key.x << " " << curr.key.y << std::endl;
-
+            int n;
+            std::cin>>n;
             std::cout << "antes de swap" << std::endl;
             //swap order of segements in status tree st
-            st.swapOrder(curr.segments[0], curr.segments[1]);
+            swapOrder(st, curr.segments[0], curr.segments[1], prev, next);
 
             std::cout << "despues de swap" << std::endl;
             //check intersections with new neighbours
-            if( st.floor(curr.segments[1], prev) ){
-                /*std::cout << "encontre prev" << std::endl;
-                std::cout << prev.p.x << " " <<  prev.p.y << std::endl;
-                std::cout << prev.q.x << " " <<  prev.q.y << std::endl;
+
+            if( prev != NULL ){
+                std::cout << "encontre prev" << std::endl;
+                std::cout << prev->p.x << " " <<  prev->p.y << std::endl;
+                std::cout << prev->q.x << " " <<  prev->q.y << std::endl;
                 std::cout << "yo" << std::endl;
                 std::cout << curr.segments[1].p.x << " " <<  curr.segments[1].p.y << std::endl;
                 std::cout << curr.segments[1].q.x << " " <<  curr.segments[1].q.y << std::endl;
-                */
-                if( intersect(curr.segments[1], prev, aux) &&
+
+                if( intersect(curr.segments[1], *prev, aux) &&
                     aux.y <= Segment::sweep_lineY ) {
                     //add intersection
                     intersections.push_back(aux);
                     std::cout << "agrege evento con prev en ";
                     std::cout << aux.x << " " << aux.y << std::endl;
                     //add intersection event
-                    eventQueue.push(Event(aux, prev, curr.segments[1]));
+                    eventQueue.push(Event(aux, *prev, curr.segments[1]));
                 }
 
             }
 
-            if( st.ceiling(curr.segments[0], next) ){
-                /*std::cout << "encontre next" << std::endl;
-                std::cout << next.p.x << " " <<  next.p.y << std::endl;
-                std::cout << next.q.x << " " <<  next.q.y << std::endl;
+            if( next != NULL ){
+                std::cout << "encontre next" << std::endl;
+                std::cout << next->p.x << " " <<  next->p.y << std::endl;
+                std::cout << next->q.x << " " <<  next->q.y << std::endl;
                 std::cout << "yo" << std::endl;
                 std::cout << curr.segments[0].p.x << " " <<  curr.segments[0].p.y << std::endl;
                 std::cout << curr.segments[0].q.x << " " <<  curr.segments[0].q.y << std::endl;
-                */
-                if( intersect(curr.segments[0], next, aux) &&
+                if( intersect(curr.segments[0], *next, aux) &&
                     aux.y <= Segment::sweep_lineY ) {
                     //add intersection
                     intersections.push_back(aux);
                     std::cout << "agrege evento con next";
                     std::cout << aux.x << " " << aux.y << std::endl;
                     //add intersection event
-                    eventQueue.push(Event(aux, curr.segments[0], next));
+                    eventQueue.push(Event(aux, curr.segments[0], *next));
                 }
 
             }
@@ -106,44 +110,56 @@ std::vector<Point> LineIntersection::sweep_line(){
 
         }//first event of segemtne then add to tree
         else if(curr.isFirst()) {
+
             std::cout << "---------------es first----------" << std::endl;
+
+            encontrarPrevNext(curr.segments[0], prev, next, st);
+            std::cout << "encontre" << std::endl;
             //check for intersections with neighbours
-            if( st.floor(curr.segments[0], prev) ){
-                if( intersect(curr.segments[0], prev, aux) &&
+
+
+            if( prev != NULL ){
+                std::cout << "--------------->>>>>>>>>>>>>>>>provar prev" << std::endl;
+                if( intersect(curr.segments[0], *prev, aux) &&
                     aux.y <= Segment::sweep_lineY ) {
+                        std::cout << "00000000000000000000000000000000000000" << std::endl;
                         //add intersection
                         intersections.push_back(aux);
 
                         //add intersection event
-                        eventQueue.push(Event(aux, prev, curr.segments[0]));
+                        eventQueue.push(Event(aux, *prev, curr.segments[0]));
 
                 }
             }
-            if( st.ceiling(curr.segments[0], next) ){
-                if( intersect(curr.segments[0], next, aux) &&
+            if( next != NULL ){
+                std::cout << "--------------->>>>>>>>>>>>>>>>provar next" << std::endl;
+                std::cout << "afuera " << (*next).p.x <<" "<<(*next).p.y << " <> " << (*next).q.x <<" "<<(*next).q.y << std::endl;
+                if( intersect(curr.segments[0], *next, aux) &&
                     aux.y <= Segment::sweep_lineY ) {
+                        std::cout << "00000000000000000000000000000000000000" << std::endl;
                         //add intersection
                         intersections.push_back(aux);
 
                         //add intersection event
-                        eventQueue.push(Event(aux, curr.segments[0], next));
+                        eventQueue.push(Event(aux, curr.segments[0], *next));
                 }
             }
             //add to the tree
-            st.put(curr.segments[0]);
+            st.insert(curr.segments[0]);
+            std::cout << "-------------------->inserte " << std::endl;
         }
         else{ //last event of segemnte then delete from tree
             //std::cout << "soy last" << std::endl;
+            encontrarPrevNext(curr.segments[0], prev, next, st);
             std::cout << "es salida" << std::endl;
             /*TODO aca hay problemas al borrar aveces no exite el nodo
             siempre deberia exitir
             */
-            st.del(curr.segments[0]);
+            st.erase(curr.segments[0]);
             //check intersection between prev and next new neighbours
-            if( st.floor(curr.segments[0], prev) &&
-                st.ceiling(curr.segments[0], next) ){
+            if( prev != NULL && next != NULL ){
 
-                if( intersect(prev, next, aux) &&
+                if( intersect(*prev, *next, aux) &&
                     aux.y <= Segment::sweep_lineY ){
 
                     intersections.push_back(aux);
@@ -152,7 +168,7 @@ std::vector<Point> LineIntersection::sweep_line(){
                     std::cout << "agregar evento de interseccion prev y next" << std::endl;
                     std::cout << "en "<<aux.x <<" "<<aux.y << std::endl;
                     //add intersection event
-                    eventQueue.push(Event(aux, prev, next));
+                    eventQueue.push(Event(aux, *prev, *next));
                 }
             }
         }
@@ -163,11 +179,134 @@ std::vector<Point> LineIntersection::sweep_line(){
     return intersections;
 }
 
+void LineIntersection::encontrarPrevNext(Segment& s, Segment* prev, Segment* next, std::set<Segment>& st){
+    std::set<Segment>::iterator it;
+    std::set<Segment>::iterator itOther;
+
+    next = NULL;
+    prev = NULL;
+    it = st.find(s);
+    if(it == st.end()) return;
+    itOther = it;
+    itOther++;
+    if(itOther != st.end()){
+        std::cout << "----------------------00000000000----------->encontre next" << std::endl;
+
+        next =  (Segment*)(&(*itOther));
+        std::cout << (*next).p.x <<" "<<(*next).p.y << " <> " << (*next).q.x <<" "<<(*next).q.y << std::endl;
+    }
+    itOther = it;
+    if(itOther != st.begin()){
+        itOther--;
+        std::cout << "-------------------0000000000000000-------------->encontre prev" << std::endl;
+        prev = new Segment((*itOther));
+    }
+}
+
+void LineIntersection::swapOrder(std::set<Segment>& st, Segment first,
+                                 Segment second, Segment* prev, Segment* next) {
+
+    std::set<Segment>::iterator itf;
+    std::set<Segment>::iterator itOther;
+
+    next = NULL;
+    prev = NULL;
+
+    itf = st.find(first);
+    itOther =  itf;
+    itOther++;
+    if( itOther != st.end() ) {
+        if( ((Segment)(*itOther)).equals(second) ){
+            ((Segment)(*itOther)) = first;
+            ((Segment)(*itf)) = second;
+            assert(! ((Segment)*itf).equals(first));
+            assert(! ((Segment)*itf).equals((Segment)*itOther));
+        }else if( ((Segment)(*itOther)).equals(first) ){
+            ((Segment)(*itOther)) = second;
+            ((Segment)(*itf)) = first;
+            assert(! ((Segment)*itf).equals(second));
+            assert(! ((Segment)*itf).equals((Segment)*itOther));
+        }
+        itOther++;
+        if(itOther != st.end()){
+            next = (Segment*)(&(*itOther));
+        }
+    }else{
+        itOther =  itf;
+        if( itOther != st.begin() ){
+            itOther--;
+            if( ((Segment)(*itOther)).equals(second) ){
+                ((Segment)(*itOther)) = first;
+                ((Segment)(*itf ))= second;
+                assert(! ((Segment)*itf).equals(first));
+                assert(! ((Segment)*itf).equals((Segment)*itOther));
+            }else if( ((Segment)(*itOther)).equals(first) ){
+                ((Segment)(*itOther)) = second;
+                ((Segment)(*itf)) = first;
+                assert(! ((Segment)*itf).equals(second));
+                assert(! ((Segment)*itf).equals((Segment)*itOther));
+            }
+            if(itOther != st.begin()){
+                itOther--;
+                prev = (Segment*)(&(*itOther));
+            }
+        }
+    }
+
+
+    /*std::cout << "--------------.>>> voy a intercabbiar" << std::endl;
+    Node* nodeF = get(first);
+    //TODO problema aca porque veces es null... nunca deberia ser null
+    if(nodeF == NULL) return;
+    Node* nodeHi = NULL;
+    Node* nodeLo = NULL;
+    if(nodeF->right != NULL) Node* nodeHi = min(nodeF->right);
+    if(nodeF->left != NULL) Node* nodeLo = max(nodeF->left);
+    if(nodeHi != NULL){
+        if(nodeF->key.equals(first)){
+            if(nodeHi->key.equals(second)){
+                nodeF->key = second;
+                nodeHi->key = first;
+                return;
+            }
+        }else{
+            if(nodeHi->key.equals(first)){
+                nodeF->key = first;
+                nodeHi->key = second;
+                return;
+            }
+        }
+    }
+
+    if(nodeLo != NULL){
+        if(nodeF->key.equals(first)){
+            if(nodeLo->key.equals(second)){
+                nodeF->key = second;
+                nodeLo->key = first;
+                return;
+            }
+        }else{
+            if(nodeLo->key.equals(first)){
+                nodeF->key = first;
+                nodeLo->key = second;
+                return;
+            }
+        }
+    }
+    //printTree();
+    */
+}
+
 bool LineIntersection::intersect(const Segment& s, const Segment& t, Point& p){
 
+    std::cout << s.p.x <<" "<<s.p.y << " <> " << s.q.x <<" "<<s.q.y << std::endl;
+    std::cout << t.p.x <<" "<<t.p.y << " <> " << t.q.x <<" "<<t.q.y << std::endl;
     if( ccw(s.p, s.q, t.p) == ccw(s.p, s.q, t.q) ||
-        ccw(t.p, t.q, s.p) == ccw(t.p, t.q, s.q)    )
+        ccw(t.p, t.q, s.p) == ccw(t.p, t.q, s.q)    ){
+            std::cout << "**********************************No intersecta" << std::endl;
         return false;
+    }
+    std::cout << "==================================================================si inter" << std::endl;
     //TODO falta colineales y extremos
 
     double den = toVec(s.p, s.q).crossMag(toVec(t.p, t.q));
