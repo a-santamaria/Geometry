@@ -10,13 +10,16 @@
 class Event{
 public:
     Point key;
-    Segment segments[2];
-    bool isIntersection;
-    std::list<Point> prevKey;
+    Segment segment;
+    int tipo;
+
+    static const int INTER = 0;
+    static const int START = 1;
+    static const int END = -1;
 
     Event() {}
-    Event(Point _key, Segment _s);
-    Event(Point _key, Segment _s, Segment _t);
+    Event(Point _key, Segment _segment);
+    Event(Point _key, int _tipo);
 
     bool isFirst();
     bool operator< (const Event& other) const;
