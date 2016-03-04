@@ -22,7 +22,6 @@
 #include <vtkLine.h>
 #include <vtkCellArray.h>
 #include "vtkPolyLine.h"
-#include "redBlackBST.h"
 
 using namespace std;
 
@@ -64,11 +63,11 @@ int main( int argc, char* argv[] )
 
     unsigned char pointColor[3] = {255, 255, 255};
 
-    vtkSmartPointer<vtkUnsignedCharArray> colors =
+    /*vtkSmartPointer<vtkUnsignedCharArray> colors =
       vtkSmartPointer<vtkUnsignedCharArray>::New();
     colors->SetNumberOfComponents(3);
     colors->SetName ("Colors");
-
+    */
     double x1, y1, x2, y2;
     vtkCellArray *cells = vtkCellArray::New();
     cells->Initialize();
@@ -89,7 +88,7 @@ int main( int argc, char* argv[] )
         cells->InsertNextCell(line);
 
         //no se si se necesita
-        colors->InsertNextTupleValue(pointColor);
+        //colors->InsertNextTupleValue(pointColor);
     }
     /*
     segment: 2.14418 -0.590303  -1.78906 -0.103435

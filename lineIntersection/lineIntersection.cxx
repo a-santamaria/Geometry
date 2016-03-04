@@ -1,5 +1,4 @@
 #include "lineIntersection.h"
-#include "redBlackBST.h"
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
@@ -146,7 +145,7 @@ std::vector<Point> LineIntersection::sweep_line(){
                         eventQueue.push(Event(aux, curr.segments[0], *next));
                 }
             }{ std::cout<<"es nulll prev "<<std::endl;}
-            
+
             std::cout << "-------------------->inserte " << std::endl;
         }
         else{ //last event of segemnte then delete from tree
@@ -184,7 +183,7 @@ std::vector<Point> LineIntersection::sweep_line(){
 }
 
 void LineIntersection::encontrarPrevNext(Segment& s, Segment* &prev, Segment* &next, std::set<Segment>& st){
-		std::cout << "---ya--" << std::endl;    
+		std::cout << "---ya--" << std::endl;
 		std::set<Segment>::iterator it;
     std::set<Segment>::iterator itOther;
 		std::cout << "----------------------st size----------->  " << st.size() << std::endl;
@@ -235,7 +234,7 @@ void LineIntersection::swapOrder(std::set<Segment>& st, Segment first,
 						(*itOther).p = first.p;
 						(*itOther).q = first.q;
 
-         
+
             (*itf).a = second.a;
             (*itf).b = second.b;
             (*itf).c = second.c;
@@ -253,7 +252,7 @@ void LineIntersection::swapOrder(std::set<Segment>& st, Segment first,
 						(*itOther).p = second.p;
 						(*itOther).q = second.q;
 
-         
+
             (*itf).a = first.a;
             (*itf).b = first.b;
             (*itf).c = first.c;
@@ -280,7 +279,7 @@ void LineIntersection::swapOrder(std::set<Segment>& st, Segment first,
 								(*itOther).p = first.p;
 								(*itOther).q = first.q;
 
-				     
+
 				        (*itf).a = second.a;
 				        (*itf).b = second.b;
 				        (*itf).c = second.c;
@@ -297,7 +296,7 @@ void LineIntersection::swapOrder(std::set<Segment>& st, Segment first,
 								(*itOther).p = second.p;
 								(*itOther).q = second.q;
 
-				     
+
 				        (*itf).a = first.a;
 				        (*itf).b = first.b;
 				        (*itf).c = first.c;
