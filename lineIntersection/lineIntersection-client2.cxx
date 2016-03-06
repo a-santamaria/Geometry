@@ -16,6 +16,7 @@
 #include <vtkCellArray.h>
 #include <vector>
 #include "point.h"
+#include "lineIntersection.h"
 
 
 // Define interaction style
@@ -109,12 +110,12 @@ int main(int, char *[])
     ids.push_back(id);
   }
 
-  std::vector<std::pair<int, int> > edges;
+  std::vector<Segment > edges;
 
 
   for(int i = 0; i < points.size()-1; i+=2){
 
-    edges.push_back( std::make_pair(i, i+1) );
+    edges.push_back( Segment(i, i+1) );
 
     vtkLine *line = vtkLine::New();
     line->GetPointIds()->SetId(0, ids[i]);
@@ -123,6 +124,19 @@ int main(int, char *[])
     cells->InsertNextCell(line);
   }
   std::cout << "acabe de crear edges" << std::endl;
+
+
+  LineIntersection li(points, edges);
+
+  std::vector<Point> intersections = li.sweep_line();
+
+  std::cout << "size " << intersections.size() << std::endl;
+  std::vector<vtkIdType> idsIntersection;
+  for(int i = 0; i < intersections.size(); i++){
+      vtkIdType id = pointsVTK->InsertNextPoint
+                                ( intersections[i].x, intersections[i].y, 0 );
+      idsIntersection.push_back(id);
+  }
 
 
   pointsPolydata->SetPoints(pointsVTK);

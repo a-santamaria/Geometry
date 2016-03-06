@@ -5,18 +5,17 @@
 #include <cassert>
 #include "point.h"
 
-double Segment::sweep_lineY = INF;
 
 bool Point::operator< (const Point& other) const{
-    if(x == other.x)
-        return y < other.y;
-    return x < other.x;
+    if(y == other.y)
+        return x < other.x;
+    return y > other.y;
 }
 
 bool Point::operator> (const Point& other) const{
-    if(x == other.x)
-        return y >= other.y;
-    return x > other.x;
+    if(y == other.y)
+        return x >= other.x;
+    return y < other.y;
 }
 
 bool Point::operator== (const Point& other) const{
@@ -35,52 +34,9 @@ Point Point::operator+ (const Point& other){
     return p;
 }
 
-Segment::Segment(Point _p, Point _q) : p(_p), q(_q) {
 
-    if(fabs(p.x - q.x) < EPS){//vertical line
-        a = 1.0;
-        b = 0.0;
-        c = -p.x;
-    }else{
-        /*a = -(double) (p.y - q.y) / (p.x - q.x);
-        b = 1.0;
-        c = -(double) (a * p.x) - p.y;*/
-        a = p.y - q.y;
-        b = q.x - p.x;
-        c = (p.x - q.x)*p.y + (q.y-p.y)*p.x;
-        /*std::cout << "soy " << std::endl;
-        std::cout << p.x << " " <<  p.y << std::endl;
-        std::cout << q.x << " " <<  q.y << std::endl;
-        std::cout << "a "<<a<<" b "<< b<<" c "<<c << std::endl;
-        std::cout << "-------------------------" << std::endl;*/
+Segment::Segment(int _idp, int _idq) : idp(_idp), idq(_idq) { }
 
-    }
-}
-
-bool Segment::operator< (const Segment& other) const{
-    assert(Segment::sweep_lineY != INF);
-    return other.getXInSweepLine() - this->getXInSweepLine() > EPS;
-}
-
-bool Segment::operator> (const Segment& other) const{
-    assert(Segment::sweep_lineY != INF);    
-    return this->getXInSweepLine() - other.getXInSweepLine() > EPS;
-}
-
-bool Segment::operator== (const Segment &other) const{
-    return fabs(other.getXInSweepLine() - this->getXInSweepLine()) <= EPS;
-}
-
-bool Segment::operator!= (const Segment &other) const{
-    return !(*this == other);
-}
-
-double Segment::getXInSweepLine() const{
-    //std::cout << "a "<<a<<" b "<< b<<" c "<<c << std::endl;
-    double test = (b*Segment::sweep_lineY);
-    test = -test - c;
-    return test / a;
-}
 
 double randF(){
     return ((double)rand() / RAND_MAX);

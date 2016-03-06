@@ -64,14 +64,14 @@ INCLUDE_DIRECTORIES(
 ## =====================
 
 ADD_EXECUTABLE(lineClient lineIntersection-client.cxx point.cxx
-                            lineIntersection.cxx)
+                           lineIntersection.cxx)
 
 TARGET_LINK_LIBRARIES(lineClient ${VTK_LIBRARIES})
 
 ADD_EXECUTABLE(lineClient2 lineIntersection-client2.cxx point.cxx
                             lineIntersection.cxx)
 
-TARGET_LINK_LIBRARIES(lineClient2 ${VTK_LIBRARIES})                            
+TARGET_LINK_LIBRARIES(lineClient2 ${VTK_LIBRARIES})
 
 
 

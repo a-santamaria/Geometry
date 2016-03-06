@@ -1,11 +1,11 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include<cmath>
+#include <cmath>
 
 
 #define EPS 1e-12
-#define INF DBL_MAX
+
 
 
 class Point{
@@ -34,31 +34,18 @@ public:
 
 class Segment{
 public:
-    mutable double a;
-    mutable double b;
-    mutable double c;
-    double getXInSweepLine() const;
 
-    mutable Point p;
-    mutable Point q;
+    mutable int idp;
+    mutable int idq;
 
-    static double sweep_lineY;
-
-    Segment() : p(0, 0), q(0, 0) {}
+    Segment() : idp(-1), idq(-1) {}
     Segment(const Segment& _s){
-        a = _s.a;
-        b = _s.b;
-        c = _s.c;
-        p = _s.p;
-        q = _s.q;
+        idp = _s.idp;
+        idq = _s.idq;
     }
-    Segment(Point _p, Point _q);
-    bool operator< (const Segment &other) const;
-    bool operator> (const Segment &other) const;
-    bool operator== (const Segment &other) const;
-    bool operator!= (const Segment &other) const;
+    Segment(int _idp, int _idq);
     bool equals(const Segment& other) const{
-        return p == other.p && q == other.q;
+        return idp == other.idp && idq == other.idq;
     }
 };
 
