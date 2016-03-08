@@ -34,12 +34,13 @@ public:
 
 class Segment{
 public:
-
+    int id;
     mutable int idp;
     mutable int idq;
 
     Segment() : idp(-1), idq(-1) {}
     Segment(const Segment& _s){
+        id = _s.id;
         idp = _s.idp;
         idq = _s.idq;
     }
