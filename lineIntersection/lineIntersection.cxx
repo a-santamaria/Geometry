@@ -139,51 +139,13 @@ std::vector<Point> LineIntersection::sweep_line() {
             if( prev != st.end() &&
                 intersect(segments[curr.idSegment], *prev, aux) &&
                 aux.y < sweep_lineY ) {
-                std::cout << aux.x << " "<<aux.y << std::endl;
-                itEventQueue = eventQueue.find(aux);
-                if( itEventQueue == eventQueue.end() ){
-                    Event e(aux, Event::INTER);
-                    eventQueue[aux] = e;
-                    intersections.push_back(aux);
-                    id = points.size();
-                    points.push_back(aux);
-                    ids[aux] = id;
-                }else{
-                    id = ids[aux];
-                }
-
-                //either way insert in subset of segments that contain aux
-                std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
-                std::cout << prev->id << " " << itCurr->id << std::endl;
-                contain[id].insert(std::make_pair(*prev, prev->id));
-                contain[id].insert(
-                        std::make_pair(segments[curr.idSegment], itCurr->id));
+                crearEventoInter(prev, itCurr, aux);
             }
 
             if( next != st.end() &&
                 intersect(segments[curr.idSegment], *next, aux) &&
                 aux.y < sweep_lineY ) {
-                std::cout << "encontre interesecion en " << std::endl;
-                std::cout << aux.x << " "<<aux.y << std::endl;
-                //TODO copiar
-                itEventQueue = eventQueue.find(aux);
-                if( itEventQueue == eventQueue.end() ){
-                    std::cout << "guardar" << std::endl;
-                    Event e(aux, Event::INTER);
-                    eventQueue[aux] = e;
-                    intersections.push_back(aux);
-                    id = points.size();
-                    points.push_back(aux);
-                    ids[aux] = id;
-                }else{
-                    id = ids[aux];
-                }
-                //either way insert in subset of segments that contain aux
-                std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
-                std::cout << next->id << " " << itCurr->id << std::endl;
-                contain[id].insert(std::make_pair(*next, next->id));
-                contain[id].insert(
-                        std::make_pair(segments[curr.idSegment], itCurr->id));
+                crearEventoInter(itCurr, next, aux);
             }
 
         }
@@ -213,7 +175,7 @@ std::vector<Point> LineIntersection::sweep_line() {
             if(ids.find(curr.key) == ids.end())
                 std::cout << "no existia" << std::endl;
             id = ids[curr.key];
-            std::cout << "id de " << curr.key.x << " : "<< id << std::endl;
+            std::cout << "id de " << curr.key.y << " : "<< id << std::endl;
             //get the subset of segments that contain the poitn curr.key
             subSetMapIterator mapIt = contain.find(id);
             std::cout << "size de subset " << mapIt->second.size() << std::endl;
@@ -249,46 +211,12 @@ std::vector<Point> LineIntersection::sweep_line() {
             encontrarPrev(first, prev, st);
             if( prev != st.end() && intersect(*first, *prev, aux) &&
                 aux.y < sweep_lineY ) {
-
-                itEventQueue = eventQueue.find(aux);
-                if( itEventQueue == eventQueue.end() ){
-                    Event e(aux, Event::INTER);
-                    eventQueue[aux] = e;
-                    intersections.push_back(aux);
-                    id = points.size();
-                    points.push_back(aux);
-                    ids[aux] = id;
-                }else{
-                    id = ids[aux];
-                }
-
-                //either way insert in subset of segments that contain aux
-                std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
-                std::cout << prev->id << " " << first->id << std::endl;
-                contain[id].insert(std::make_pair(*prev, prev->id));
-                contain[id].insert(std::make_pair(*first, first->id));
+                crearEventoInter(prev, first, aux);
             }
             encontrarNext(last, next, st);
             if( next != st.end() && intersect(*last, *next, aux) &&
                 aux.y < sweep_lineY ) {
-
-                itEventQueue = eventQueue.find(aux);
-                if( itEventQueue == eventQueue.end() ){
-                    Event e(aux, Event::INTER);
-                    eventQueue[aux] = e;
-                    intersections.push_back(aux);
-                    id = points.size();
-                    points.push_back(aux);
-                    ids[aux] = id;
-                }else{
-                    id = ids[aux];
-                }
-
-                //either way insert in subset of segments that contain aux
-                std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
-                std::cout << next->id << " " << last->id << std::endl;
-                contain[id].insert(std::make_pair(*next, next->id));
-                contain[id].insert(std::make_pair(*last, last->id));
+                crearEventoInter(last, next, aux);
             }
 
 
