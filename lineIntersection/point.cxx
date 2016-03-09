@@ -37,6 +37,11 @@ Point Point::operator+ (const Point& other){
 
 Segment::Segment(int _idp, int _idq) : idp(_idp), idq(_idq) { }
 
+Segment::Segment(const Segment& _s){
+    id = _s.id;
+    idp = _s.idp;
+    idq = _s.idq;
+}
 
 double randF(){
     return ((double)rand() / RAND_MAX);

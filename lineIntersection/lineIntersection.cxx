@@ -51,7 +51,7 @@ double LineIntersection::SegmentComparator::
 
 bool LineIntersection::SegmentComparator::
             operator()(const Segment& a, const Segment& b) const {
-    return getXInSweepLine(a) < getXInSweepLine(b);
+    return (getXInSweepLine(b) - getXInSweepLine(a)) > EPS;
 }
 
 double LineIntersection::SegmentComparator2::
@@ -67,21 +67,19 @@ double LineIntersection::SegmentComparator2::
 bool LineIntersection::SegmentComparator2::
 operator()(const  std::pair< Segment, int >& a,
            const  std::pair< Segment, int >& b) const {
-    return getXInSweepLine(a.first) < getXInSweepLine(b.first);
+    return (getXInSweepLine(b.first) - getXInSweepLine(a.first)) > EPS;
 }
 
 
 std::vector<Point> LineIntersection::sweep_line() {
-    std::vector<Point> intersections;
 
-    std::map<Point, Event> eventQueue;
     std::map<Point, Event>::iterator itEventQueue;
 
-    std::map<Point, int> ids;
+    ids.clear();
     for(int i = 0; i < points.size(); i++){
         ids[ points[i] ] = i;
     }
-
+    eventQueue.clear();
     for(int i = 0; i < segments.size(); i++) {
         segments[i].id = i;
         Event ep(points[segments[i].idp], i);
@@ -94,11 +92,12 @@ std::vector<Point> LineIntersection::sweep_line() {
         eventQueue[ points[segments[i].idq] ] = eq;
     }
 
-    std::set<Segment, SegmentComparator>::iterator next;
-    std::set<Segment, SegmentComparator>::iterator prev;
+    setSegmentIterator next;
+    setSegmentIterator prev;
     Point aux;
     int id;
 
+    intersections.clear();
     st.clear();
     contain.clear();
     locationInSet.clear();
@@ -115,7 +114,7 @@ std::vector<Point> LineIntersection::sweep_line() {
         sweep_lineY = curr.key.y;
 
         if (curr.tipo == Event::START) {
-            std::cout << "voy a insertar con id " << segments[curr.idSegment].id  << std::endl;
+                std::cout << "voy a insertar con id " << segments[curr.idSegment].id  << std::endl;
             std::pair<setSegmentIterator, bool>
                 returnInsert = st.insert(segments[curr.idSegment]);
 
@@ -166,6 +165,7 @@ std::vector<Point> LineIntersection::sweep_line() {
                 aux.y < sweep_lineY ) {
                 std::cout << "encontre interesecion en " << std::endl;
                 std::cout << aux.x << " "<<aux.y << std::endl;
+                //TODO copiar
                 itEventQueue = eventQueue.find(aux);
                 if( itEventQueue == eventQueue.end() ){
                     std::cout << "guardar" << std::endl;
@@ -188,7 +188,14 @@ std::vector<Point> LineIntersection::sweep_line() {
 
         }
         else if (curr.tipo == Event::END) {
-            std::cout << "soy salida" << std::endl;
+            printST();
+            encontrarPrevNext(segments[curr.idSegment], prev, next, st);
+            std::cout << "soy salida idSEgemt:" << curr.idSegment << std::endl;
+            if( prev != st.end())
+                std::cout << "hay prev" << std::endl;
+            if( next != st.end() ){
+                std::cout << "hay next" << std::endl;
+            }
             if( prev != st.end() && next  != st.end() &&
                 intersect(*prev, *next, aux) && aux.y < sweep_lineY &&
                 eventQueue.find(aux) == eventQueue.end() ){
@@ -196,13 +203,17 @@ std::vector<Point> LineIntersection::sweep_line() {
                     Event e(aux, Event::INTER);
                     eventQueue[aux] = e;
                 intersections.push_back(aux);
+                crearEventoInter(prev, next, aux);
             }
             st.erase(segments[curr.idSegment]);
             locationInSet[curr.idSegment] = st.end();
         }
         else if (curr.tipo == Event::INTER) {
             std::cout << "soy interseccion" << std::endl;
+            if(ids.find(curr.key) == ids.end())
+                std::cout << "no existia" << std::endl;
             id = ids[curr.key];
+            std::cout << "id de " << curr.key.x << " : "<< id << std::endl;
             //get the subset of segments that contain the poitn curr.key
             subSetMapIterator mapIt = contain.find(id);
             std::cout << "size de subset " << mapIt->second.size() << std::endl;
@@ -289,6 +300,43 @@ std::vector<Point> LineIntersection::sweep_line() {
     return intersections;
 }
 
+
+void LineIntersection::printST(){
+    setSegmentIterator it = st.begin();
+    std::cout << "/* -----------st----------- */" << std::endl;
+    for(;it != st.end(); it++){
+        std::cout<<it->id<<" ";
+    }
+    std::cout <<std::endl<< "/* ---------------------- */" << std::endl;
+}
+
+void LineIntersection::crearEventoInter(setSegmentIterator first,
+                                        setSegmentIterator last,
+                                        const Point& aux){
+    std::map<Point, Event>::iterator  itEventQueue = eventQueue.find(aux);
+    int id;
+    if( itEventQueue == eventQueue.end() ){
+        std::cout << "guardar" << std::endl;
+        Event e(aux, Event::INTER);
+        eventQueue[aux] = e;
+        intersections.push_back(aux);
+        id = points.size();
+        points.push_back(aux);
+        ids[aux] = id;
+    }else{
+        id = ids[aux];
+    }
+    //either way insert in subset of segments that contain aux
+    std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
+    std::cout << first->id << " " << last->id << std::endl;
+
+    sweep_lineY -= 1;
+    contain[id].insert(std::make_pair(*first, first->id));
+    contain[id].insert(std::make_pair(*last, last->id));
+    sweep_lineY += 1;
+
+}
+
 void LineIntersection::encontrarPrev(setSegmentIterator me, setSegmentIterator &prev,
                                     std::set<Segment, SegmentComparator>& st) {
     setSegmentIterator it = me;
@@ -334,8 +382,10 @@ void LineIntersection::encontrarPrevNext(Segment& s,
 	std::cout << "----------------------st size----------->  " << st.size() << std::endl;
     next = st.end();
     prev = st.end();
+    std::cout << "voy a buscar con st en y: " << sweep_lineY << std::endl;
     it = st.find(s);
     if(it == st.end()) { std::cout<<"==============>paiala find" << std::endl; return;}
+    std::cout << "encontre " << it->id << std::endl;
     itOther = it;
     itOther++;
 		std::cout << "----------------------st size----------->  " << st.size() << std::endl;
@@ -364,9 +414,11 @@ void LineIntersection::swapOrder(int ids, int idt) {
 
     locationInSet[ids]->idp = locationInSet[idt]->idp;
     locationInSet[ids]->idq = locationInSet[idt]->idq;
+    locationInSet[ids]->id  = locationInSet[idt]->id;
 
     locationInSet[idt]->idp = aux.idp;
     locationInSet[idt]->idq = aux.idq;
+    locationInSet[idt]->id  = aux.id;
 
     //cange iterators
     setSegmentIterator auxIt = locationInSet[ids];

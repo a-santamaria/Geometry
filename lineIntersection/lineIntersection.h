@@ -11,6 +11,7 @@
 #include <map>
 
 #define INF DBL_MAX
+#define EPS 1e-12
 
 class Event{
 public:
@@ -70,6 +71,12 @@ private:
     std::map<int, setSegmentIterator> locationInSet;
     //status tree
     std::set<Segment, SegmentComparator> st;
+    //queue of events sorted by y coordinate
+    std::map<Point, Event> eventQueue;
+    //intersection points
+    std::vector<Point> intersections;
+    //point identifiers
+    std::map<Point, int> ids;
 
     void swapOrder(int ids, int idt);
     bool intersect(const Segment& s, const Segment& t, Point& p);
@@ -81,6 +88,10 @@ private:
                            setSegmentIterator &prev,
                            setSegmentIterator &next,
                            std::set<Segment, SegmentComparator>& st);
+   void crearEventoInter(setSegmentIterator first, setSegmentIterator last,
+                         const Point& aux);
+
+    void printST();
 
 };
 
