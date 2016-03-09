@@ -105,7 +105,6 @@ std::vector<Point> LineIntersection::sweep_line() {
 
     while(!eventQueue.empty()){
 
-        std::cout << "sacar neuvo evento" << std::endl;
         itEventQueue = eventQueue.begin();
         Event curr(itEventQueue->second);
         std::cout << "saque " << curr.key.y << std::endl;
@@ -114,32 +113,18 @@ std::vector<Point> LineIntersection::sweep_line() {
         sweep_lineY = curr.key.y;
 
         if (curr.tipo == Event::START) {
-                std::cout << "voy a insertar con id " << segments[curr.idSegment].id  << std::endl;
             std::pair<setSegmentIterator, bool>
                 returnInsert = st.insert(segments[curr.idSegment]);
 
             setSegmentIterator itCurr = returnInsert.first;
-            std::cout << "inserte con id " << itCurr->id << std::endl;
             locationInSet[curr.idSegment] = itCurr;
 
             encontrarPrevNext(segments[curr.idSegment], prev, next, st);
 
-            if(next != st.end()){
-                std::cout << "---------------next está en ----" << std::endl;
-                std::cout << points[next->idp].x <<" "<<points[next->idp].y << " <> ";
-                std::cout  << points[next->idq].x <<" "<<points[next->idq].y << std::endl;
-            }
-
-            if(prev != st.end()){
-                std::cout << "---------------prev está en ----" << std::endl;
-                std::cout << points[prev->idp].x <<" "<<points[prev->idp].y << " <> ";
-                std::cout  << points[prev->idq].x <<" "<<points[prev->idq].y << std::endl;
-            }
 
             if( prev != st.end() &&
                 intersect(segments[curr.idSegment], *prev, aux) &&
                 aux.y < sweep_lineY ) {
-                std::cout << aux.x << " "<<aux.y << std::endl;
                 itEventQueue = eventQueue.find(aux);
                 if( itEventQueue == eventQueue.end() ){
                     Event e(aux, Event::INTER);
@@ -153,8 +138,6 @@ std::vector<Point> LineIntersection::sweep_line() {
                 }
 
                 //either way insert in subset of segments that contain aux
-                std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
-                std::cout << prev->id << " " << itCurr->id << std::endl;
                 contain[id].insert(std::make_pair(*prev, prev->id));
                 contain[id].insert(
                         std::make_pair(segments[curr.idSegment], itCurr->id));
@@ -163,12 +146,9 @@ std::vector<Point> LineIntersection::sweep_line() {
             if( next != st.end() &&
                 intersect(segments[curr.idSegment], *next, aux) &&
                 aux.y < sweep_lineY ) {
-                std::cout << "encontre interesecion en " << std::endl;
-                std::cout << aux.x << " "<<aux.y << std::endl;
                 //TODO copiar
                 itEventQueue = eventQueue.find(aux);
                 if( itEventQueue == eventQueue.end() ){
-                    std::cout << "guardar" << std::endl;
                     Event e(aux, Event::INTER);
                     eventQueue[aux] = e;
                     intersections.push_back(aux);
@@ -179,8 +159,6 @@ std::vector<Point> LineIntersection::sweep_line() {
                     id = ids[aux];
                 }
                 //either way insert in subset of segments that contain aux
-                std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
-                std::cout << next->id << " " << itCurr->id << std::endl;
                 contain[id].insert(std::make_pair(*next, next->id));
                 contain[id].insert(
                         std::make_pair(segments[curr.idSegment], itCurr->id));
@@ -188,14 +166,7 @@ std::vector<Point> LineIntersection::sweep_line() {
 
         }
         else if (curr.tipo == Event::END) {
-            printST();
             encontrarPrevNext(segments[curr.idSegment], prev, next, st);
-            std::cout << "soy salida idSEgemt:" << curr.idSegment << std::endl;
-            if( prev != st.end())
-                std::cout << "hay prev" << std::endl;
-            if( next != st.end() ){
-                std::cout << "hay next" << std::endl;
-            }
             if( prev != st.end() && next  != st.end() &&
                 intersect(*prev, *next, aux) && aux.y < sweep_lineY &&
                 eventQueue.find(aux) == eventQueue.end() ){
@@ -209,14 +180,9 @@ std::vector<Point> LineIntersection::sweep_line() {
             locationInSet[curr.idSegment] = st.end();
         }
         else if (curr.tipo == Event::INTER) {
-            std::cout << "soy interseccion" << std::endl;
-            if(ids.find(curr.key) == ids.end())
-                std::cout << "no existia" << std::endl;
             id = ids[curr.key];
-            std::cout << "id de " << curr.key.x << " : "<< id << std::endl;
             //get the subset of segments that contain the poitn curr.key
             subSetMapIterator mapIt = contain.find(id);
-            std::cout << "size de subset " << mapIt->second.size() << std::endl;
             setSegmentIterator2 subSetIt = (mapIt->second).begin();
             setSegmentReverseIterator2 subSetReversIt = (mapIt->second).rbegin();
 
@@ -224,8 +190,7 @@ std::vector<Point> LineIntersection::sweep_line() {
             setSegmentIterator first = locationInSet[subSetIt->second];
             setSegmentIterator last = locationInSet[subSetReversIt->second];
             */
-            std::cout << "swap de ids:" << std::endl;
-            std::cout <<subSetIt->second<<"  "<<subSetReversIt->second << std::endl;
+
             //swap outer segments
             swapOrder(subSetIt->second, subSetReversIt->second);
 
@@ -238,13 +203,6 @@ std::vector<Point> LineIntersection::sweep_line() {
             }
             setSegmentIterator last = locationInSet[subSetIt->second];
             setSegmentIterator first = locationInSet[subSetReversIt->second];
-
-            std::cout << "cambien quedo: " << std::endl;
-            std::cout << "first " << points[first->idp].x << " " << points[first->idp].y << " <> ";
-            std::cout << points[first->idq].x << " " << points[first->idq].y << std::endl;
-
-            std::cout << "last " << points[last->idp].x << " " << points[last->idp].y << " <> ";
-            std::cout << points[last->idq].x << " " << points[last->idq].y << std::endl;
 
             encontrarPrev(first, prev, st);
             if( prev != st.end() && intersect(*first, *prev, aux) &&
@@ -263,8 +221,6 @@ std::vector<Point> LineIntersection::sweep_line() {
                 }
 
                 //either way insert in subset of segments that contain aux
-                std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
-                std::cout << prev->id << " " << first->id << std::endl;
                 contain[id].insert(std::make_pair(*prev, prev->id));
                 contain[id].insert(std::make_pair(*first, first->id));
             }
@@ -285,8 +241,6 @@ std::vector<Point> LineIntersection::sweep_line() {
                 }
 
                 //either way insert in subset of segments that contain aux
-                std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
-                std::cout << next->id << " " << last->id << std::endl;
                 contain[id].insert(std::make_pair(*next, next->id));
                 contain[id].insert(std::make_pair(*last, last->id));
             }
@@ -316,7 +270,6 @@ void LineIntersection::crearEventoInter(setSegmentIterator first,
     std::map<Point, Event>::iterator  itEventQueue = eventQueue.find(aux);
     int id;
     if( itEventQueue == eventQueue.end() ){
-        std::cout << "guardar" << std::endl;
         Event e(aux, Event::INTER);
         eventQueue[aux] = e;
         intersections.push_back(aux);
@@ -327,8 +280,6 @@ void LineIntersection::crearEventoInter(setSegmentIterator first,
         id = ids[aux];
     }
     //either way insert in subset of segments that contain aux
-    std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
-    std::cout << first->id << " " << last->id << std::endl;
 
     sweep_lineY -= 1;
     contain[id].insert(std::make_pair(*first, first->id));
@@ -344,9 +295,6 @@ void LineIntersection::encontrarPrev(setSegmentIterator me, setSegmentIterator &
         setSegmentIterator itOther = it;
         if( itOther != st.begin() ) {
             itOther--;
-            std::cout << "entoncre prev" << std::endl;
-            std::cout << points[itOther->idp].x << " " << points[itOther->idp].y << " <> ";
-            std::cout << points[itOther->idq].x << " " << points[itOther->idq].y << std::endl;
             prev = itOther;
             return;
         }
@@ -362,9 +310,6 @@ void LineIntersection::encontrarNext(setSegmentIterator me, setSegmentIterator &
         setSegmentIterator itOther = it;
         itOther++;
         if( itOther != st.end() ) {
-            std::cout << "encontre next" << std::endl;
-            std::cout << points[itOther->idp].x << " " << points[itOther->idp].y << " <> ";
-            std::cout << points[itOther->idq].x << " " << points[itOther->idq].y << std::endl;
             next = itOther;
             return;
         }
@@ -379,28 +324,20 @@ void LineIntersection::encontrarPrevNext(Segment& s,
                         std::set<Segment, SegmentComparator>& st) {
 	std::set<Segment, SegmentComparator>::iterator it;
     std::set<Segment, SegmentComparator>::iterator itOther;
-	std::cout << "----------------------st size----------->  " << st.size() << std::endl;
     next = st.end();
     prev = st.end();
-    std::cout << "voy a buscar con st en y: " << sweep_lineY << std::endl;
     it = st.find(s);
-    if(it == st.end()) { std::cout<<"==============>paiala find" << std::endl; return;}
-    std::cout << "encontre " << it->id << std::endl;
+    if(it == st.end()) { return;}
     itOther = it;
     itOther++;
-		std::cout << "----------------------st size----------->  " << st.size() << std::endl;
     if(itOther != st.end()){
-        std::cout << "----------------------00000000000----------->encontre next" << std::endl;
 
         next =  itOther;
 
-        std::cout << points[itOther->idp].x <<" "<<points[itOther->idp].y << " <> ";
-        std::cout  << points[itOther->idq].x <<" "<<points[itOther->idq].y << std::endl;
     }
     itOther = it;
     if(itOther != st.begin()){
         itOther--;
-        std::cout << "-------------------0000000000000000-------------->encontre prev" << std::endl;
         prev = itOther;
     }
 }
@@ -431,7 +368,6 @@ bool LineIntersection::intersect(const Segment& s, const Segment& t, Point& p){
         ccw(points[s.idp], points[s.idq], points[t.idq]) ||
         ccw(points[t.idp], points[t.idq], points[s.idp]) ==
         ccw(points[t.idp], points[t.idq], points[s.idq])    ){
-            std::cout << "************************No intersecta" << std::endl;
         return false;
     }
 
@@ -451,6 +387,5 @@ bool LineIntersection::intersect(const Segment& s, const Segment& t, Point& p){
     p.x = p.x*ss;
     p.y = p.y*ss;
     p = p + points[s.idp];
-    std::cout << "intersecta en "<<p.x<< " "<<p.y << std::endl;
     return true;
 }

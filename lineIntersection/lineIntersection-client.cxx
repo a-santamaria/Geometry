@@ -182,7 +182,6 @@ int main( int argc, char* argv[] )
 
     LineIntersection lineInt(points, segments);
 
-    clock_t begin = clock();
 
     vector<Point> ints = lineInt.sweep_line();
 
@@ -191,10 +190,7 @@ int main( int argc, char* argv[] )
         pointsVTK->InsertNextPoint (ints[i].x, ints[i].y, 0);
     }
 
-    clock_t end = clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 
-    cout << "time: " << elapsed_secs << endl;
 
 
 
