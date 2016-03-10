@@ -4,7 +4,7 @@
 #include <cmath>
 
 
-#define EPS 1e-12
+#define EPS 1e-9
 
 
 

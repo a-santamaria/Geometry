@@ -11,7 +11,7 @@
 #include <map>
 
 #define INF DBL_MAX
-#define EPS 1e-12
+#define EPS 1e-9
 
 class Event{
 public:

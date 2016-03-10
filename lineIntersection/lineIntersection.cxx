@@ -30,7 +30,11 @@ bool Event::isFirst() {
 }
 
 bool Event::operator< (const Event& other) const {
-    if(key.y == other.key.y) return key.x < other.key.x;
+    if( fabs(key.y - other.key.y) < EPS){
+      if( fabs(key.x - other.key.x) < EPS)
+        return false;
+      return key.x < other.key.x;
+    }
     return key.y < other.key.y;
 }
 
@@ -51,7 +55,10 @@ double LineIntersection::SegmentComparator::
 
 bool LineIntersection::SegmentComparator::
             operator()(const Segment& a, const Segment& b) const {
-    return (getXInSweepLine(b) - getXInSweepLine(a)) > EPS;
+    double xb = getXInSweepLine(b);
+    double xa = getXInSweepLine(a);
+    if(fabs( xb - xa ) < EPS) return false;
+    return xa < xb;
 }
 
 double LineIntersection::SegmentComparator2::
@@ -67,7 +74,10 @@ double LineIntersection::SegmentComparator2::
 bool LineIntersection::SegmentComparator2::
 operator()(const  std::pair< Segment, int >& a,
            const  std::pair< Segment, int >& b) const {
-    return (getXInSweepLine(b.first) - getXInSweepLine(a.first)) > EPS;
+    double xb = getXInSweepLine(b.first);
+    double xa = getXInSweepLine(a.first);
+    if(fabs( xb - xa ) < EPS) return false;
+    return xa < xb;
 }
 
 
@@ -108,9 +118,9 @@ std::vector<Point> LineIntersection::sweep_line() {
         std::cout << "sacar neuvo evento" << std::endl;
         itEventQueue = eventQueue.begin();
         Event curr(itEventQueue->second);
-        std::cout << "saque " << curr.key.y << std::endl;
+        std::cout << "saque " << curr.key.y << " id "<< curr.idSegment<< std::endl;
         eventQueue.erase(itEventQueue);
-
+        printST();
         sweep_lineY = curr.key.y;
 
         if (curr.tipo == Event::START) {
@@ -150,24 +160,22 @@ std::vector<Point> LineIntersection::sweep_line() {
 
         }
         else if (curr.tipo == Event::END) {
+            std::cout << "antes de buscar prev next" << std::endl;
             printST();
             encontrarPrevNext(segments[curr.idSegment], prev, next, st);
             std::cout << "soy salida idSEgemt:" << curr.idSegment << std::endl;
             if( prev != st.end())
-                std::cout << "hay prev" << std::endl;
+                std::cout << "hay prev " << prev->id << std::endl;
             if( next != st.end() ){
-                std::cout << "hay next" << std::endl;
+                std::cout << "hay next " << next->id << std::endl;
             }
             if( prev != st.end() && next  != st.end() &&
-                intersect(*prev, *next, aux) && aux.y < sweep_lineY &&
-                eventQueue.find(aux) == eventQueue.end() ){
+                intersect(*prev, *next, aux) && aux.y < sweep_lineY ){
 
-                    Event e(aux, Event::INTER);
-                    eventQueue[aux] = e;
-                intersections.push_back(aux);
                 crearEventoInter(prev, next, aux);
             }
             st.erase(segments[curr.idSegment]);
+            std::cout<<"bbbbbbbbbbbbbbbbbbbbboooooooooooorre "<<curr.idSegment<<std::endl;
             locationInSet[curr.idSegment] = st.end();
         }
         else if (curr.tipo == Event::INTER) {
@@ -244,7 +252,7 @@ void LineIntersection::crearEventoInter(setSegmentIterator first,
     std::map<Point, Event>::iterator  itEventQueue = eventQueue.find(aux);
     int id;
     if( itEventQueue == eventQueue.end() ){
-        std::cout << "guardar" << std::endl;
+        std::cout << "**************************************guardar" << std::endl;
         Event e(aux, Event::INTER);
         eventQueue[aux] = e;
         intersections.push_back(aux);
@@ -335,7 +343,7 @@ void LineIntersection::encontrarPrevNext(Segment& s,
 }
 
 void LineIntersection::swapOrder(int ids, int idt) {
-
+    std::cout<< "entre a swap"<<std::endl;
     assert(locationInSet[ids] != st.end());
     assert(locationInSet[idt] != st.end());
 
