@@ -66,7 +66,7 @@ int main( int argc, char* argv[] )
     vtkIdType id1, id2;
     vtkLine *line;
     int cont = 0;
-
+/*
     for(int i = 0 ; i < NumL; i++){
         randEllipse(100, 100, 0, 0, 1, x1, y1);
         points.push_back(Point(x1, y1));
@@ -101,7 +101,7 @@ int main( int argc, char* argv[] )
 
 */
 
-/*
+
     x1=-4.02914, y1=-6.63292, x2=-2.48544, y2=0.861063;
     points.push_back(Point(x1, y1));
     points.push_back(Point(x2, y2));
@@ -154,7 +154,7 @@ int main( int argc, char* argv[] )
 
     cells->InsertNextCell(line);
 */
-/*
+
   x1=5.97359, y1=-4.66666, x2=-5.70057, y2=0.60124;
     points.push_back(Point(x1, y1));
     points.push_back(Point(x2, y2));
@@ -219,7 +219,7 @@ int main( int argc, char* argv[] )
 
     cells->InsertNextCell(line);
 */
-/*
+
     x1=-1.22352, y1=8.21843, x2=-5.97388, y2=-2.42994;
     points.push_back(Point(x1, y1));
     points.push_back(Point(x2, y2));
@@ -233,7 +233,7 @@ int main( int argc, char* argv[] )
     cells->InsertNextCell(line);
 
 
-*/
+
 
     //TODO change clock_t for the other library
 
