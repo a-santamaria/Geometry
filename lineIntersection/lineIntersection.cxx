@@ -258,10 +258,11 @@ void LineIntersection::crearEventoInter(setSegmentIterator first,
     std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&77voy a mater ids: ";
     std::cout << first->id << " " << last->id << std::endl;
 
-    sweep_lineY -= 1;
+    double guardar = sweep_lineY;
+    sweep_lineY = aux.y + 1;
     contain[id].insert(std::make_pair(*first, first->id));
     contain[id].insert(std::make_pair(*last, last->id));
-    sweep_lineY += 1;
+    sweep_lineY = guardar;
 
 }
 
