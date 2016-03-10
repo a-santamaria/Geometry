@@ -7,9 +7,14 @@
 
 
 bool Point::operator< (const Point& other) const{
+  /*if( fabs(other.y - y) < EPS)
+      return (other.x - x) > EPS;
+  return  (other.y - y) > EPS;
+  */
     if(y == other.y)
         return x < other.x;
     return y > other.y;
+    
 }
 
 bool Point::operator> (const Point& other) const{
