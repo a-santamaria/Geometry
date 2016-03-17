@@ -32,12 +32,14 @@ public:
 
 class Segment{
 public:
+    int id;
     int idp;
     int idq;
 
     Segment() : idp(-1), idq(-1) {}
     Segment(const Segment& _s);
     Segment(int _idp, int _idq);
+    Segment(int _idp, int _idq, int _id);
 
     friend std::ostream& operator<<(std::ostream&, const Segment& s);
     bool equals(const Segment& other) const{

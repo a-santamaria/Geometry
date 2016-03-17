@@ -20,7 +20,10 @@ std::ostream& operator<<(std::ostream &strm, const Point &p) {
 
 Segment::Segment(int _idp, int _idq) : idp(_idp), idq(_idq) { }
 
+Segment::Segment(int _idp, int _idq, int _id) : idp(_idp), idq(_idq), id(_id) {}
+
 Segment::Segment(const Segment& _s){
+    id = _s.id;
     idp = _s.idp;
     idq = _s.idq;
 }
