@@ -37,6 +37,8 @@ public:
    };
    typedef std::set<Segment, SegmentComparator>::iterator setSegmentIterator;
 
+   std::vector<Segment> newSegments;
+
 private:
     //type of vertices
     enum Type { START, END, REGULAR, MERGE, SPLIT };
@@ -55,6 +57,7 @@ private:
     std::map<int, int> helper;
     // map from segment id to iterator in st
     std::map<int, setSegmentIterator> segmentIterators;
+
 
 public:
     PolygonTriangulation();

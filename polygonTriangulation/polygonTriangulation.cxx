@@ -1,4 +1,5 @@
 #include "polygonTriangulation.h"
+#include <cassert>
 
 double PolygonTriangulation::sweep_lineY = INF;
 std::vector< Point > PolygonTriangulation::points;
@@ -117,13 +118,14 @@ void PolygonTriangulation::handleEnd( Event& eCurr ) {
     int idPrev = pId - 1;
     if( idPrev == -1 ) idPrev = points.size()-1;
 
+    assert(helper.find(idPrev) != helper.end());
     int idHelper = helper[idPrev];
     if( typeOfVertices[ idHelper ] == MERGE ) {
         //TODO insert diagonal pId to idHelper
+        newSegments.push_back( Segment( pId, idHelper ) );
     }
     setSegmentIterator it = segmentIterators[idPrev];
     st.erase( it );
-
 }
 
 void PolygonTriangulation::handleSplit( Event& eCurr ) {
@@ -131,11 +133,18 @@ void PolygonTriangulation::handleSplit( Event& eCurr ) {
     Point pCurr = points[pId];
     setSegmentIterator leftEdge = st.upper_bound(edges[pId]);
 
+    assert(helper.find(leftEdge->id) != helper.end());
     int idHelper = helper[leftEdge->id];
     //TODO insert diagonal pId to idHelper
+    newSegments.push_back( Segment( pId, idHelper ) );
 
     //change helper of left edge
     helper[leftEdge->id] = pId;
+
+    std::pair<setSegmentIterator, bool> resp = st.insert( edges[pId] );
+    std::cout << "meti " << pId << std::endl;
+    segmentIterators[pId] = resp.first;
+    helper[pId] = pId;
 }
 
 void PolygonTriangulation::handleMerge( Event& eCurr ) {
@@ -147,6 +156,7 @@ void PolygonTriangulation::handleMerge( Event& eCurr ) {
     int idHelper = helper[idPrev];
     if( typeOfVertices[ idHelper ] == MERGE ) {
         //TODO insert diagonal pId to idHelper
+        newSegments.push_back( Segment( pId, idHelper ) );
     }
     setSegmentIterator it = segmentIterators[idPrev];
     st.erase( it );
@@ -156,6 +166,7 @@ void PolygonTriangulation::handleMerge( Event& eCurr ) {
     idHelper = helper[leftEdge->id];
     if( typeOfVertices[ idHelper ] == MERGE ) {
         //TODO insert diagonal pId to idHelper
+        newSegments.push_back( Segment( pId, idHelper ) );
     }
 
     //change helper of left edge
@@ -173,6 +184,7 @@ void PolygonTriangulation::handleRegular( Event& eCurr ) {
     if( regionToRight(pId) ) {
         if( typeOfVertices[idHelper] == MERGE ) {
             //TODO insert diagonal pId to idHelper
+            newSegments.push_back( Segment( pId, idHelper ) );
         }
         setSegmentIterator it = segmentIterators[idPrev];
         st.erase( it );
@@ -187,6 +199,7 @@ void PolygonTriangulation::handleRegular( Event& eCurr ) {
         idHelper = helper[leftEdge->id];
         if( typeOfVertices[ idHelper ] == MERGE ) {
             //TODO insert diagonal pId to idHelper
+            newSegments.push_back( Segment( pId, idHelper ) );
         }
 
         //change helper of left edge

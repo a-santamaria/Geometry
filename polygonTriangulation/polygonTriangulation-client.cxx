@@ -127,6 +127,14 @@ int main(int, char *[])
     cells->InsertNextCell(line);
   }
 
+  for(int i = 0; i < pt.newSegments.size(); i++){
+      vtkLine *line = vtkLine::New();
+      line->GetPointIds()->SetId(0, ids[ pt.newSegments[i].idp ]);
+      line->GetPointIds()->SetId(1, ids[ pt.newSegments[i].idq ]);
+
+      cells->InsertNextCell(line);
+  }
+
   edges.push_back( Segment(points.size()-1, 0) );
 
   vtkLine *line = vtkLine::New();
