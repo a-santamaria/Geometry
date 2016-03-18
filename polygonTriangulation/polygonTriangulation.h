@@ -37,7 +37,7 @@ public:
    };
    typedef std::set<Segment, SegmentComparator>::iterator setSegmentIterator;
 
-   std::vector<Segment> newSegments;
+   std::vector< Segment > newSegments;
 
 private:
     //type of vertices
@@ -57,11 +57,14 @@ private:
     std::map<int, setSegmentIterator> segmentIterators;
     //counterclockwise doubly-connected edge list (it's a graph)
     std::vector< std::vector<int> > graph;
+    //marcas
+    std::map< std::pair<int, int>, bool > marcas;
 
 
 public:
     PolygonTriangulation();
     PolygonTriangulation( std::vector<Point> _points );
+    //TODO change name to create edcges something y private
     void triangulate();
 
 private:
@@ -72,7 +75,9 @@ private:
     void handleRegular( Event& eCurr );
     Type typeOfVertex ( int id );
     bool regionToRight ( int id );
+    void createEdge ( int pId, int idHelper );
     void printGraph();
+    void constructPolygons();
 };
 
 #endif

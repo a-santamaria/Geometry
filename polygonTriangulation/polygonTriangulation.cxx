@@ -97,6 +97,8 @@ void PolygonTriangulation::triangulate() {
     }
     printGraph();
 
+    constructPolygons();
+
 }
 
 
@@ -117,11 +119,7 @@ void PolygonTriangulation::handleEnd( Event& eCurr ) {
     assert(helper.find(idPrev) != helper.end());
     int idHelper = helper[idPrev];
     if( typeOfVertices[ idHelper ] == MERGE ) {
-        //insert diagonal pId to idHelper
-        newSegments.push_back( Segment( pId, idHelper ) );
-        //insert new edges in graph
-        graph[pId].push_back(idHelper);
-        graph[idHelper].push_back(pId);
+        createEdge(pId, idHelper);
     }
     setSegmentIterator it = segmentIterators[idPrev];
     st.erase( it );
@@ -135,11 +133,7 @@ void PolygonTriangulation::handleSplit( Event& eCurr ) {
     assert(helper.find(leftEdge->id) != helper.end());
     int idHelper = helper[leftEdge->id];
 
-    //insert diagonal pId to idHelper
-    newSegments.push_back( Segment( pId, idHelper ) );
-    //insert new edges in graph
-    graph[pId].push_back(idHelper);
-    graph[idHelper].push_back(pId);
+    createEdge(pId, idHelper);
 
     //change helper of left edge
     helper[leftEdge->id] = pId;
@@ -158,11 +152,7 @@ void PolygonTriangulation::handleMerge( Event& eCurr ) {
 
     int idHelper = helper[idPrev];
     if( typeOfVertices[ idHelper ] == MERGE ) {
-        //insert diagonal pId to idHelper
-        newSegments.push_back( Segment( pId, idHelper ) );
-        //insert new edges in graph
-        graph[pId].push_back(idHelper);
-        graph[idHelper].push_back(pId);
+        createEdge(pId, idHelper);
     }
     setSegmentIterator it = segmentIterators[idPrev];
     st.erase( it );
@@ -171,11 +161,7 @@ void PolygonTriangulation::handleMerge( Event& eCurr ) {
 
     idHelper = helper[leftEdge->id];
     if( typeOfVertices[ idHelper ] == MERGE ) {
-        //insert diagonal pId to idHelper
-        newSegments.push_back( Segment( pId, idHelper ) );
-        //insert new edges in graph
-        graph[pId].push_back(idHelper);
-        graph[idHelper].push_back(pId);
+        createEdge(pId, idHelper);
     }
 
     //change helper of left edge
@@ -192,11 +178,7 @@ void PolygonTriangulation::handleRegular( Event& eCurr ) {
     int idHelper = helper[idPrev];
     if( regionToRight(pId) ) {
         if( typeOfVertices[idHelper] == MERGE ) {
-            //insert diagonal pId to idHelper
-            newSegments.push_back( Segment( pId, idHelper ) );
-            //insert new edges in graph
-            graph[pId].push_back(idHelper);
-            graph[idHelper].push_back(pId);
+            createEdge(pId, idHelper);
         }
         setSegmentIterator it = segmentIterators[idPrev];
         st.erase( it );
@@ -210,11 +192,7 @@ void PolygonTriangulation::handleRegular( Event& eCurr ) {
 
         idHelper = helper[leftEdge->id];
         if( typeOfVertices[ idHelper ] == MERGE ) {
-            //insert diagonal pId to idHelper
-            newSegments.push_back( Segment( pId, idHelper ) );
-            //insert new edges in graph
-            graph[pId].push_back(idHelper);
-            graph[idHelper].push_back(pId);
+            createEdge(pId, idHelper);
         }
 
         //change helper of left edge
@@ -231,6 +209,27 @@ bool PolygonTriangulation::regionToRight ( int id ) {
     if( points[prev].y > points[id].y ) return true;
     else                                return false;
 }
+
+void PolygonTriangulation::createEdge ( int pId, int idHelper ) {
+    //insert diagonal pId to idHelper
+    newSegments.push_back( Segment( pId, idHelper ) );
+    //insert new edges in graph
+    graph[pId].push_back(idHelper);
+    graph[idHelper].push_back(pId);
+    //create marcas
+    marcas[ std::make_pair<int,int>(pId, idHelper) ] = false;
+    marcas[ std::make_pair<int,int>(idHelper, pId) ] = false;
+}
+
+void PolygonTriangulation::constructPolygons() {
+    std::map< std::pair<int, int>, bool >::iterator it;
+
+    for(it = marcas.begin(); it != marcas.end(); it++) {
+        //TODO
+    }
+
+}
+
 
 void PolygonTriangulation::printGraph() {
     std::cout << "------------graph------------" << std::endl;
