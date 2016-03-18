@@ -40,22 +40,19 @@ PolygonTriangulation::Type PolygonTriangulation::typeOfVertex( int id ){
 
 PolygonTriangulation::PolygonTriangulation( std::vector<Point> _points ) {
     points = _points;
+    graph.assign( _points.size(), std::vector<int>() );
 
     int id = 0;
     for(int i = 0; i < points.size()-1; i++){
         edges.push_back( Segment( i, i+1, id++ ) );
-        edgesList.push_back(i);
         typeOfVertices.push_back( typeOfVertex(i) );
         eventQueue.push( Event(i) );
+        graph[i].push_back(i+1);
     }
     edges.push_back( Segment( points.size()-1, 0, id ) );
-    edgesList.push_back( points.size()-1 );
     typeOfVertices.push_back( typeOfVertex( points.size()-1 ) );
     eventQueue.push( Event(points.size()-1) );
-
-    //make it cyclic
-    edgesList.tail->next = edgesList.head;
-    edgesList.head->prev = edgesList.tail;
+    graph[points.size()-1].push_back(0);
 }
 
 
@@ -97,9 +94,8 @@ void PolygonTriangulation::triangulate() {
         } else if ( typeOfVertices[pId] == REGULAR ) {
             handleRegular( eCurr );
         }
-
-
     }
+    printGraph();
 
 }
 
@@ -121,8 +117,11 @@ void PolygonTriangulation::handleEnd( Event& eCurr ) {
     assert(helper.find(idPrev) != helper.end());
     int idHelper = helper[idPrev];
     if( typeOfVertices[ idHelper ] == MERGE ) {
-        //TODO insert diagonal pId to idHelper
+        //insert diagonal pId to idHelper
         newSegments.push_back( Segment( pId, idHelper ) );
+        //insert new edges in graph
+        graph[pId].push_back(idHelper);
+        graph[idHelper].push_back(pId);
     }
     setSegmentIterator it = segmentIterators[idPrev];
     st.erase( it );
@@ -135,8 +134,12 @@ void PolygonTriangulation::handleSplit( Event& eCurr ) {
 
     assert(helper.find(leftEdge->id) != helper.end());
     int idHelper = helper[leftEdge->id];
-    //TODO insert diagonal pId to idHelper
+
+    //insert diagonal pId to idHelper
     newSegments.push_back( Segment( pId, idHelper ) );
+    //insert new edges in graph
+    graph[pId].push_back(idHelper);
+    graph[idHelper].push_back(pId);
 
     //change helper of left edge
     helper[leftEdge->id] = pId;
@@ -155,8 +158,11 @@ void PolygonTriangulation::handleMerge( Event& eCurr ) {
 
     int idHelper = helper[idPrev];
     if( typeOfVertices[ idHelper ] == MERGE ) {
-        //TODO insert diagonal pId to idHelper
+        //insert diagonal pId to idHelper
         newSegments.push_back( Segment( pId, idHelper ) );
+        //insert new edges in graph
+        graph[pId].push_back(idHelper);
+        graph[idHelper].push_back(pId);
     }
     setSegmentIterator it = segmentIterators[idPrev];
     st.erase( it );
@@ -165,8 +171,11 @@ void PolygonTriangulation::handleMerge( Event& eCurr ) {
 
     idHelper = helper[leftEdge->id];
     if( typeOfVertices[ idHelper ] == MERGE ) {
-        //TODO insert diagonal pId to idHelper
+        //insert diagonal pId to idHelper
         newSegments.push_back( Segment( pId, idHelper ) );
+        //insert new edges in graph
+        graph[pId].push_back(idHelper);
+        graph[idHelper].push_back(pId);
     }
 
     //change helper of left edge
@@ -183,8 +192,11 @@ void PolygonTriangulation::handleRegular( Event& eCurr ) {
     int idHelper = helper[idPrev];
     if( regionToRight(pId) ) {
         if( typeOfVertices[idHelper] == MERGE ) {
-            //TODO insert diagonal pId to idHelper
+            //insert diagonal pId to idHelper
             newSegments.push_back( Segment( pId, idHelper ) );
+            //insert new edges in graph
+            graph[pId].push_back(idHelper);
+            graph[idHelper].push_back(pId);
         }
         setSegmentIterator it = segmentIterators[idPrev];
         st.erase( it );
@@ -198,8 +210,11 @@ void PolygonTriangulation::handleRegular( Event& eCurr ) {
 
         idHelper = helper[leftEdge->id];
         if( typeOfVertices[ idHelper ] == MERGE ) {
-            //TODO insert diagonal pId to idHelper
+            //insert diagonal pId to idHelper
             newSegments.push_back( Segment( pId, idHelper ) );
+            //insert new edges in graph
+            graph[pId].push_back(idHelper);
+            graph[idHelper].push_back(pId);
         }
 
         //change helper of left edge
@@ -215,4 +230,17 @@ bool PolygonTriangulation::regionToRight ( int id ) {
 
     if( points[prev].y > points[id].y ) return true;
     else                                return false;
+}
+
+void PolygonTriangulation::printGraph() {
+    std::cout << "------------graph------------" << std::endl;
+    std::cout << "size " << graph.size() << std::endl;
+    for(int i = 0; i < graph.size(); i++){
+        std::cout << i << ": " ;
+        for(int j = 0; j < graph[i].size(); j++){
+            std::cout << graph[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "----------------------------" << std::endl;
 }

@@ -7,9 +7,9 @@
 #include <map>
 #include <cmath>
 #include <cfloat>
+#include <iostream>
 #include "point.h"
-#include "list.h"
-#include "list.hxx"
+
 
 #define INF DBL_MAX
 
@@ -46,8 +46,6 @@ private:
     std::vector<Type> typeOfVertices;
     //counterclockwise segments
     std::vector<Segment> edges;
-    //counterclockwise doubly-connected cyclic list of edges
-    List<int> edgesList;
     //event queue
     std::priority_queue<Event> eventQueue;
     //status tree (ordenado al reves para poder usar upper_bound
@@ -57,6 +55,8 @@ private:
     std::map<int, int> helper;
     // map from segment id to iterator in st
     std::map<int, setSegmentIterator> segmentIterators;
+    //counterclockwise doubly-connected edge list (it's a graph)
+    std::vector< std::vector<int> > graph;
 
 
 public:
@@ -72,6 +72,7 @@ private:
     void handleRegular( Event& eCurr );
     Type typeOfVertex ( int id );
     bool regionToRight ( int id );
+    void printGraph();
 };
 
 #endif
