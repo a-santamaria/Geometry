@@ -62,6 +62,10 @@ bool ccw(Point p, Point q, Point r){
     return toVec(q, p).crossMag( toVec(q, r) ) < 0;
 }
 
+double getTurn(Point p, Point q, Point r){
+    return toVec(q, p).crossMag( toVec(q, r) );
+}
+
 bool collinear(Point p, Point q, Point r){
     return toVec(q, p).crossMag( toVec(q, r) ) == 0;
 }

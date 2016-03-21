@@ -96,7 +96,6 @@ void PolygonTriangulation::triangulate() {
         }
     }
     printGraph();
-
     constructPolygons();
 
 }
@@ -119,7 +118,11 @@ void PolygonTriangulation::handleEnd( Event& eCurr ) {
     assert(helper.find(idPrev) != helper.end());
     int idHelper = helper[idPrev];
     if( typeOfVertices[ idHelper ] == MERGE ) {
-        createEdge(pId, idHelper);
+        //insert diagonal pId to idHelper
+        newSegments.push_back( Segment( pId, idHelper ) );
+        //insert new edges in graph
+        graph[pId].push_back(idHelper);
+        graph[idHelper].push_back(pId);
     }
     setSegmentIterator it = segmentIterators[idPrev];
     st.erase( it );
@@ -133,7 +136,11 @@ void PolygonTriangulation::handleSplit( Event& eCurr ) {
     assert(helper.find(leftEdge->id) != helper.end());
     int idHelper = helper[leftEdge->id];
 
-    createEdge(pId, idHelper);
+    //insert diagonal pId to idHelper
+    newSegments.push_back( Segment( pId, idHelper ) );
+    //insert new edges in graph
+    graph[pId].push_back(idHelper);
+    graph[idHelper].push_back(pId);
 
     //change helper of left edge
     helper[leftEdge->id] = pId;
@@ -152,7 +159,11 @@ void PolygonTriangulation::handleMerge( Event& eCurr ) {
 
     int idHelper = helper[idPrev];
     if( typeOfVertices[ idHelper ] == MERGE ) {
-        createEdge(pId, idHelper);
+        //insert diagonal pId to idHelper
+        newSegments.push_back( Segment( pId, idHelper ) );
+        //insert new edges in graph
+        graph[pId].push_back(idHelper);
+        graph[idHelper].push_back(pId);
     }
     setSegmentIterator it = segmentIterators[idPrev];
     st.erase( it );
@@ -161,7 +172,11 @@ void PolygonTriangulation::handleMerge( Event& eCurr ) {
 
     idHelper = helper[leftEdge->id];
     if( typeOfVertices[ idHelper ] == MERGE ) {
-        createEdge(pId, idHelper);
+        //insert diagonal pId to idHelper
+        newSegments.push_back( Segment( pId, idHelper ) );
+        //insert new edges in graph
+        graph[pId].push_back(idHelper);
+        graph[idHelper].push_back(pId);
     }
 
     //change helper of left edge
@@ -178,7 +193,11 @@ void PolygonTriangulation::handleRegular( Event& eCurr ) {
     int idHelper = helper[idPrev];
     if( regionToRight(pId) ) {
         if( typeOfVertices[idHelper] == MERGE ) {
-            createEdge(pId, idHelper);
+            //insert diagonal pId to idHelper
+            newSegments.push_back( Segment( pId, idHelper ) );
+            //insert new edges in graph
+            graph[pId].push_back(idHelper);
+            graph[idHelper].push_back(pId);
         }
         setSegmentIterator it = segmentIterators[idPrev];
         st.erase( it );
@@ -192,7 +211,11 @@ void PolygonTriangulation::handleRegular( Event& eCurr ) {
 
         idHelper = helper[leftEdge->id];
         if( typeOfVertices[ idHelper ] == MERGE ) {
-            createEdge(pId, idHelper);
+            //insert diagonal pId to idHelper
+            newSegments.push_back( Segment( pId, idHelper ) );
+            //insert new edges in graph
+            graph[pId].push_back(idHelper);
+            graph[idHelper].push_back(pId);
         }
 
         //change helper of left edge
@@ -210,26 +233,76 @@ bool PolygonTriangulation::regionToRight ( int id ) {
     else                                return false;
 }
 
-void PolygonTriangulation::createEdge ( int pId, int idHelper ) {
-    //insert diagonal pId to idHelper
-    newSegments.push_back( Segment( pId, idHelper ) );
-    //insert new edges in graph
-    graph[pId].push_back(idHelper);
-    graph[idHelper].push_back(pId);
-    //create marcas
-    marcas[ std::make_pair<int,int>(pId, idHelper) ] = false;
-    marcas[ std::make_pair<int,int>(idHelper, pId) ] = false;
-}
-
 void PolygonTriangulation::constructPolygons() {
-    std::map< std::pair<int, int>, bool >::iterator it;
-
-    for(it = marcas.begin(); it != marcas.end(); it++) {
-        //TODO
+    std::pair<int, int> key;
+    std::queue< std::pair<int, int> > q;
+    for(int i = 0; i < newSegments.size(); i++) {
+        key.first = newSegments[i].idp;
+        key.second = newSegments[i].idq;
+        marcas[key] = false;
+        q.push(key);
+        key.first = newSegments[i].idq;
+        key.second = newSegments[i].idp;
+        marcas[key] = false;
+        q.push(key);
     }
+    std::pair<int, int> curr;
+    while(!q.empty()) {
+        curr = q.front();
+        q.pop();
 
+        if(!marcas[curr]) {
+            marcas[curr] = true;
+            std::vector<int> monoPoly = getMonotonePoly(curr.first, curr.second);
+            monotonePolys.push_back( monoPoly );
+        }
+    }
+    std::cout << "----------monotone polys ----------------" << std::endl;
+    for(int i = 0; i < monotonePolys.size(); i++) {
+        for(int j = 0; j < monotonePolys[i].size(); j++) {
+            std::cout << monotonePolys[i][j] << " ";
+        }
+        std::cout<<std::endl;
+    }
+    std::cout << "--------------------------------------" << std::endl;
 }
 
+std::vector<int> PolygonTriangulation::getMonotonePoly(int first, int second) {
+    std::vector<int> monoPoly;
+    monoPoly.push_back(first);
+    monoPoly.push_back(second);
+
+    int prev = first;
+    int curr = second;
+
+    while(curr != first){
+
+        //get the most left turn
+        int lowest = INF;
+        int lowestId = -1;
+        std::cout << "menor " << lowest  << std::endl;
+        for(int i = 0; i < graph[curr].size(); i++){
+            int currN = graph[curr][i];
+            if (currN == prev) continue;
+            int turn = getTurn(points[prev], points[curr], points[currN]);
+            std::cout << prev << " " << curr << " " << currN << std::endl;
+            std::cout << "trun " << turn << std::endl;
+            if(turn < lowest) {
+                lowest = turn;
+                lowestId = currN;
+            }
+        }
+        //marcar
+        std::pair<int, int> key(curr, lowestId);
+        if(marcas.find(key) != marcas.end()) {
+            marcas[key] = true;
+        }
+        monoPoly.push_back(lowestId);
+        prev = curr;
+        curr = lowestId;
+    }
+    return monoPoly;
+}
 
 void PolygonTriangulation::printGraph() {
     std::cout << "------------graph------------" << std::endl;

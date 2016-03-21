@@ -59,6 +59,8 @@ private:
     std::vector< std::vector<int> > graph;
     //marcas
     std::map< std::pair<int, int>, bool > marcas;
+    //y-monotone polygons
+    std::vector< std::vector<int> > monotonePolys;
 
 
 public:
@@ -76,8 +78,10 @@ private:
     Type typeOfVertex ( int id );
     bool regionToRight ( int id );
     void createEdge ( int pId, int idHelper );
-    void printGraph();
     void constructPolygons();
+    std::vector<int> getMonotonePoly(int first, int second);
+
+    void printGraph();
 };
 
 #endif
