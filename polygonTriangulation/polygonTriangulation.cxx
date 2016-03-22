@@ -14,6 +14,18 @@ bool Event::operator< (const Event& other) const {
     return PolygonTriangulation::points[pId].y < PolygonTriangulation::points[other.pId].y;
 }
 
+MonotoneEvent::MonotoneEvent() {}
+
+MonotoneEvent::MonotoneEvent( int _pId, int _pos ) : pId(_pId), pos(_pos) {}
+
+bool MonotoneEvent::operator< (const MonotoneEvent& other) const {
+    if( PolygonTriangulation::points[pId].y == PolygonTriangulation::points[other.pId].y )
+        return PolygonTriangulation::points[pId].x > PolygonTriangulation::points[other.pId].x;
+    return PolygonTriangulation::points[pId].y < PolygonTriangulation::points[other.pId].y;
+}
+
+
+
 PolygonTriangulation::PolygonTriangulation() {}
 
 PolygonTriangulation::Type PolygonTriangulation::typeOfVertex( int id ){
@@ -81,7 +93,7 @@ void PolygonTriangulation::triangulate() {
 
         sweep_lineY = pCurr.y;
 
-        std::cout << pCurr << " type " << typeOfVertices[pId] << std::endl;
+        std::cout << pCurr << " id " << pId << " type " << typeOfVertices[pId] << std::endl;
 
         if( typeOfVertices[pId] == START ){
             handleStart( eCurr );
@@ -97,7 +109,7 @@ void PolygonTriangulation::triangulate() {
     }
     printGraph();
     constructPolygons();
-
+    trinagulateMonotonePolys();
 }
 
 
@@ -280,13 +292,11 @@ std::vector<int> PolygonTriangulation::getMonotonePoly(int first, int second) {
         //get the most left turn
         int lowest = INF;
         int lowestId = -1;
-        std::cout << "menor " << lowest  << std::endl;
         for(int i = 0; i < graph[curr].size(); i++){
             int currN = graph[curr][i];
             if (currN == prev) continue;
             int turn = getTurn(points[prev], points[curr], points[currN]);
-            std::cout << prev << " " << curr << " " << currN << std::endl;
-            std::cout << "trun " << turn << std::endl;
+
             if(turn < lowest) {
                 lowest = turn;
                 lowestId = currN;
@@ -302,6 +312,150 @@ std::vector<int> PolygonTriangulation::getMonotonePoly(int first, int second) {
         curr = lowestId;
     }
     return monoPoly;
+}
+
+void PolygonTriangulation::trinagulateMonotonePolys() {
+
+    if(monotonePolys.size() == 0) {
+        std::vector<int> poly;
+        std::cout << "size " << points.size() << std::endl;
+        for(int i = 0; i < points.size(); i++){
+            poly.push_back(i);
+        }
+        poly.push_back(0);
+        trinagulateMonotonePoly(poly);
+    }
+    for(int i = 0; i < monotonePolys.size(); i++){
+        trinagulateMonotonePoly(monotonePolys[i]);
+    }
+}
+
+void PolygonTriangulation::trinagulateMonotonePoly(std::vector<int>& poly) {
+    std::cout << "mi poly" << std::endl;
+    std::priority_queue<MonotoneEvent> triangulateQueue;
+    for(int i = 0; i < poly.size()-1; i++) {
+        std::cout << "voy a meter" << poly[i] << std::endl;
+        triangulateQueue.push(MonotoneEvent(poly[i], i));
+    }
+
+    MonotoneEvent top1 = triangulateQueue.top();
+    triangulateQueue.pop();
+    MonotoneEvent top2 = triangulateQueue.top();
+    triangulateQueue.pop();
+    std::stack< std::pair<int, int> > s;
+    //TODO change to LEFT & RIGHT
+    std::stack<int> chain;  // 1 = left | -1 = right
+    int currChain;
+    int savedChain;
+    s.push( std::make_pair<int, int>(top1.pId, top1.pos) );
+    s.push( std::make_pair<int, int>(top2.pId, top2.pos) );
+
+    std::cout << "son " <<  top1.pos << " " << top2.pos<< std::endl;
+    if( abs(top1.pos - top2.pos) == 1 ) {
+        std::cout << "dif == 1" << std::endl;
+        if (top1.pos > top2.pos) {
+            chain.push(1);
+            chain.push(-1);
+        } else {
+            chain.push(-1);
+            chain.push(1);
+        }
+    } else {
+        if(top1.pos == 0) {
+            chain.push(1);
+            chain.push(-1);
+        } else {
+            chain.push(-1);
+            chain.push(1);
+        }
+    }
+
+    MonotoneEvent curr;
+    std::pair<int, int> top;
+
+    for(int i = 2; i < poly.size()-2; i++) {
+        curr = triangulateQueue.top();
+        triangulateQueue.pop();
+        std::cout << "curr " << curr.pId << " pos " << curr.pos << std::endl;
+        std::cout << "top " << s.top().first << " pos " << s.top().second << std::endl;
+        //same chain
+        if( (abs(curr.pos - s.top().second) == 1) ||
+            (curr.pos == 0       && s.top().second == poly.size()-2) ||
+            (s.top().second == 0 && curr.pos == poly.size()-2) ){
+
+                std::cout << "same chain " << chain.top()<< std::endl;
+                top = s.top();
+                s.pop();
+                savedChain = currChain = chain.top();
+                chain.pop();
+                std::cout << "pop de " << top.first << std::endl;
+                std::cout << "voy a probar "<< curr.pId << " " << top.first << " " << s.top().first<< std::endl;
+                while(!s.empty()) {
+                    bool sePuede = true;
+                    if(currChain == -1) { //right chain
+                        if ( !ccw(points[curr.pId],
+                                 points[top.first],
+                                 points[s.top().first]) ) {
+                                 std::cout << "si se puede dar la vuelta" << std::endl;
+                            sePuede = false;
+                        }
+                        if(!sePuede)
+                            std::cout << "no se puede dar la vuelta" << std::endl;
+                    } else { //left chain
+                        if ( ccw(points[curr.pId],
+                                 points[top.first],
+                                 points[s.top().first]) ) {
+                            sePuede = false;
+                        }
+                    }
+                    if(!sePuede) break;
+
+                    top = s.top();
+                    s.pop();
+                    savedChain = chain.top();
+                    chain.pop();
+                    newSegments.push_back(Segment(curr.pId, top.first));
+                }
+                s.push( top );
+                chain.push(savedChain);
+                s.push( std::make_pair<int, int>(curr.pId, curr.pos) );
+                chain.push(currChain);
+
+
+        } else {//different chains
+
+            std::cout << "different chains" << std::endl;
+
+            //insert diagonals to stack ponints excepto to last one
+            //save top
+            savedChain = chain.top();
+            top = s.top();
+            while(s.size() > 1) {
+                newSegments.push_back(Segment(curr.pId, s.top().first));
+                s.pop();
+                chain.pop();
+            }
+            s.pop();
+            chain.pop();
+
+            s.push( top );
+            chain.push(savedChain);
+            s.push( std::make_pair<int, int>(curr.pId, curr.pos) );
+            chain.push(savedChain * -1);
+
+
+
+        }
+    }
+    curr = triangulateQueue.top();
+    triangulateQueue.pop();
+    s.pop();
+    while( s.size() > 1) {
+        std::cout << "left " << s.top().first << std::endl;
+        newSegments.push_back(Segment(curr.pId, s.top().first));
+        s.pop();
+    }
+
 }
 
 void PolygonTriangulation::printGraph() {

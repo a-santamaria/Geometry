@@ -3,11 +3,13 @@
 
 #include <vector>
 #include <queue>
+#include <stack>
 #include <set>
 #include <map>
 #include <cmath>
 #include <cfloat>
 #include <iostream>
+#include <cstdlib>
 #include "point.h"
 
 
@@ -20,8 +22,18 @@ public:
     int pId;
 
     Event();
-    Event( int pId );
+    Event( int _pId );
     bool operator< (const Event& other) const;
+};
+
+class MonotoneEvent {
+public:
+    int pId;
+    int pos;
+
+    MonotoneEvent();
+    MonotoneEvent(int _pId, int _pos);
+    bool operator< (const MonotoneEvent& other) const;
 };
 
 class PolygonTriangulation {
@@ -80,6 +92,8 @@ private:
     void createEdge ( int pId, int idHelper );
     void constructPolygons();
     std::vector<int> getMonotonePoly(int first, int second);
+    void trinagulateMonotonePolys();
+    void trinagulateMonotonePoly(std::vector<int>& poly);
 
     void printGraph();
 };
