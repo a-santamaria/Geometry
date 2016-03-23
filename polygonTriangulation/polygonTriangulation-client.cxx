@@ -104,8 +104,23 @@ int main(int, char *[])
 
   std::vector<vtkIdType> ids;
   std::vector<Point> points = style->points;
+/*
+  std::vector<Point> points;
 
-  //std::vector<Point> points;
+  points.push_back(Point(42, 408));
+points.push_back(Point(39, 299));
+points.push_back(Point(113, 364));
+points.push_back(Point(127, 127));
+points.push_back(Point(276, 329));
+points.push_back(Point(358, 91));
+points.push_back(Point(443, 563));
+
+/*
+  points.push_back(Point(111, 382));
+  points.push_back(Point(85, 274));
+  points.push_back(Point(241, 227));
+  points.push_back(Point(367, 301));
+  points.push_back(Point(341, 474));
 /*
     points.push_back(Point(120, 434));
     points.push_back(Point(121, 343));
@@ -182,6 +197,16 @@ int main(int, char *[])
   cells->InsertNextCell(line);
 
   std::cout << "acabe de crear edges" << std::endl;
+
+  std::cout << "================Plys===========" << std::endl;
+  for(int i = 0; i < pt.polySoup.size(); i++) {
+      for(int j = 0; j < 3; j++){
+          std::cout << pt.polySoup[i].idPoints[j] << " ";
+      }
+      std::cout << std::endl;
+  }
+  std::cout << "=================================" << std::endl;
+
 
 /*
   LineIntersection li(points, edges);

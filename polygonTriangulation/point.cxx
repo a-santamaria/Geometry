@@ -5,27 +5,30 @@
 #include <cassert>
 #include "point.h"
 
-
 bool Point::operator< (const Point& other) const{
     if(y == other.y)
         return x > other.x;
     return y < other.y;
 }
 
-
 std::ostream& operator<<(std::ostream &strm, const Point &p) {
     return strm << "(" << p.x << " " << p.y << ")";
 }
-
 
 Segment::Segment(int _idp, int _idq) : idp(_idp), idq(_idq) { }
 
 Segment::Segment(int _idp, int _idq, int _id) : idp(_idp), idq(_idq), id(_id) {}
 
-Segment::Segment(const Segment& _s){
+Segment::Segment(const Segment& _s) {
     id = _s.id;
     idp = _s.idp;
     idq = _s.idq;
+}
+
+Triangle::Triangle(int p, int q, int r) {
+    idPoints[0] = p;
+    idPoints[1] = q;
+    idPoints[2] = r;
 }
 
 std::ostream& operator<<(std::ostream &strm, const Segment &s) {

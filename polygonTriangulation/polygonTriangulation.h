@@ -50,6 +50,7 @@ public:
    typedef std::set<Segment, SegmentComparator>::iterator setSegmentIterator;
 
    std::vector< Segment > newSegments;
+   std::vector<Triangle> polySoup;
 
 private:
     //type of vertices

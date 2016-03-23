@@ -9,7 +9,7 @@
 
 
 
-class Point{
+class Point {
 public:
     double x;
     double y;
@@ -21,7 +21,7 @@ public:
     friend std::ostream& operator<<(std::ostream&, const Point& p);
 };
 
-class Vec{
+class Vec {
 public:
     double x, y;
 
@@ -30,7 +30,7 @@ public:
     Vec(double _x, double _y) : x(_x), y(_y) {}
 };
 
-class Segment{
+class Segment {
 public:
     int id;
     int idp;
@@ -45,6 +45,12 @@ public:
     bool equals(const Segment& other) const{
         return idp == other.idp && idq == other.idq;
     }
+};
+
+class Triangle {
+public:
+    int idPoints[3];
+    Triangle(int p, int q, int r);
 };
 
 double randF();
