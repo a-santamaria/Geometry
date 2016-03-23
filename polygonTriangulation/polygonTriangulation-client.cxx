@@ -17,6 +17,7 @@
 #include <vector>
 #include "point.h"
 #include "polygonTriangulation.h"
+#include "triangleSubdivision.h"
 
 
 // Define interaction style
@@ -202,11 +203,34 @@ points.push_back(Point(443, 563));
   for(int i = 0; i < pt.polySoup.size(); i++) {
       for(int j = 0; j < 3; j++){
           std::cout << pt.polySoup[i].idPoints[j] << " ";
+          std::cout << points[pt.polySoup[i].idPoints[j]] << " -> ";
       }
       std::cout << std::endl;
   }
   std::cout << "=================================" << std::endl;
 
+
+  TriangleSubdivision ts(points, pt.polySoup);
+
+  ts.subdivide();
+
+  std::vector<int> ids2;
+  std::cout << "size " << ts.newPoints.size() << std::endl;
+  for(int i = 0; i < ts.newPoints.size(); i++){
+    std::cout << "voy a insertar " <<
+    ts.newPoints[i].x << " " << ts.newPoints[i].y << std::endl;
+    vtkIdType id = pointsVTK->InsertNextPoint ( ts.newPoints[i].x,
+                                                ts.newPoints[i].y, 0 );
+    ids2.push_back(id);
+  }
+
+  for(int i = 0; i < ts.newSegments.size(); i++){
+      vtkLine *line = vtkLine::New();
+      line->GetPointIds()->SetId(0, ids2[ ts.newSegments[i].idp ]);
+      line->GetPointIds()->SetId(1, ids2[ ts.newSegments[i].idq ]);
+
+      cells->InsertNextCell(line);
+  }
 
 /*
   LineIntersection li(points, edges);
