@@ -232,20 +232,6 @@ points.push_back(Point(443, 563));
       cells->InsertNextCell(line);
   }
 
-/*
-  LineIntersection li(points, edges);
-
-  std::vector<Point> intersections = li.sweep_line();
-
-  std::cout << "size " << intersections.size() << std::endl;
-  std::vector<vtkIdType> idsIntersection;
-  for(int i = 0; i < intersections.size(); i++){
-      vtkIdType id = pointsVTK->InsertNextPoint
-                                ( intersections[i].x, intersections[i].y, 0 );
-      idsIntersection.push_back(id);
-  }
-
-*/
   pointsPolydata->SetPoints(pointsVTK);
 
 
