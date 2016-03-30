@@ -15,7 +15,6 @@ void TriangleSubdivision::subdivide() {
     int id;
     for(int i = 0; i < polySoup.size(); i++) {
 
-        std::cout << "new points size " << newPoints.size() << std::endl;
         ids = polySoup[i].idPoints;
 
         key.first = ids[0]; key.second = ids[1];

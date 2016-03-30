@@ -58,7 +58,7 @@ void randEllipse( double r1, double r2, double cx, double cy, double d,
                   double& x, double& y);
 Vec toVec(Point p, Point q);
 bool ccw(Point p, Point q, Point r);
-double getTurn(Point p, Point q, Point r);
+double getAngle(Point p, Point q, Point r);
 bool collinear(Point p, Point q, Point r);
 
 struct CompByAngleStruct {

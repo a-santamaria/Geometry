@@ -65,8 +65,15 @@ bool ccw(Point p, Point q, Point r){
     return toVec(q, p).crossMag( toVec(q, r) ) < 0;
 }
 
-double getTurn(Point p, Point q, Point r){
-    return toVec(q, p).crossMag( toVec(q, r) );
+double getAngle(Point p, Point q, Point r){
+    Vec qp =toVec(q, p);
+    Vec qr = toVec(q, r);
+    double n1 = sqrt( (qp.x*qp.x) + (qp.y*qp.y) );
+    double n2 = sqrt( (qr.x*qr.x) + (qr.y*qr.y) );
+    double dot = (qp.x * qr.x) + (qp.y * qr.y);
+    double alpah = acos( dot / (n1*n2) );
+
+    return alpah;
 }
 
 bool collinear(Point p, Point q, Point r){

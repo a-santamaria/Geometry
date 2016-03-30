@@ -35,7 +35,7 @@ class customMouseInteractorStyle : public vtkInteractorStyleTrackballCamera
       vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
       int pos[2];
       this->Interactor->GetEventPosition(pos[0], pos[1]);
-      std::cout << "points.push_back(Point(" << pos[0] << ", " << pos[1] << "));"<< std::endl;
+      //std::cout << "points.push_back(Point(" << pos[0] << ", " << pos[1] << "));"<< std::endl;
       points.push_back(Point(pos[0], pos[1]));
       // Forward events
       vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
@@ -47,6 +47,12 @@ class customMouseInteractorStyle : public vtkInteractorStyleTrackballCamera
     }
 
 };
+
+void systemPause() {
+    char systemPouse;
+    std::cout << "Press key to continue ..." << std::endl;
+    std::cin >> systemPouse;
+}
 
 vtkStandardNewMacro(customMouseInteractorStyle);
 
@@ -105,70 +111,13 @@ int main(int, char *[])
 
   std::vector<vtkIdType> ids;
   std::vector<Point> points = style->points;
-/*
-  std::vector<Point> points;
 
-  points.push_back(Point(42, 408));
-points.push_back(Point(39, 299));
-points.push_back(Point(113, 364));
-points.push_back(Point(127, 127));
-points.push_back(Point(276, 329));
-points.push_back(Point(358, 91));
-points.push_back(Point(443, 563));
-
-/*
-  points.push_back(Point(111, 382));
-  points.push_back(Point(85, 274));
-  points.push_back(Point(241, 227));
-  points.push_back(Point(367, 301));
-  points.push_back(Point(341, 474));
-/*
-    points.push_back(Point(120, 434));
-    points.push_back(Point(121, 343));
-    points.push_back(Point(62, 252));
-    points.push_back(Point(168, 157));
-    points.push_back(Point(211, 259));
-    points.push_back(Point(350, 119));
-    points.push_back(Point(452, 339));
-    points.push_back(Point(507, 509));
-    points.push_back(Point(288, 576));
-*/
-/*
-
-    points.push_back(Point(93, 371));
-    points.push_back(Point(107, 238));
-    points.push_back(Point(218, 177));
-    points.push_back(Point(261, 280));
-    points.push_back(Point(376, 132));
-    points.push_back(Point(400, 539));
-*/
-/*
-    points.push_back(Point(87, 429));
-    points.push_back(Point(180, 334));
-    points.push_back(Point(104, 237));
-    points.push_back(Point(224, 247));
-    points.push_back(Point(286, 179));
-    points.push_back(Point(321, 289));
-    points.push_back(Point(430, 128));
-    points.push_back(Point(431, 320));
-    points.push_back(Point(537, 331));
-    points.push_back(Point(480, 417));
-    points.push_back(Point(400, 387));
-    points.push_back(Point(388, 511));
-    points.push_back(Point(318, 467));
-    points.push_back(Point(273, 554));
-    points.push_back(Point(176, 535));
-*/
   for(int i = 0; i < points.size(); i++){
     vtkIdType id = pointsVTK->InsertNextPoint ( points[i].x, points[i].y, 0 );
     ids.push_back(id);
   }
 
   std::vector<Segment > edges;
-
-  PolygonTriangulation pt( points );
-
-  pt.triangulate();
 
   for(int i = 0; i < points.size()-1; i++){
 
@@ -181,14 +130,6 @@ points.push_back(Point(443, 563));
     cells->InsertNextCell(line);
   }
 
-  for(int i = 0; i < pt.newSegments.size(); i++){
-      vtkLine *line = vtkLine::New();
-      line->GetPointIds()->SetId(0, ids[ pt.newSegments[i].idp ]);
-      line->GetPointIds()->SetId(1, ids[ pt.newSegments[i].idq ]);
-
-      cells->InsertNextCell(line);
-  }
-
   edges.push_back( Segment(points.size()-1, 0) );
 
   vtkLine *line = vtkLine::New();
@@ -196,41 +137,6 @@ points.push_back(Point(443, 563));
   line->GetPointIds()->SetId(1, ids[0]);
 
   cells->InsertNextCell(line);
-
-  std::cout << "acabe de crear edges" << std::endl;
-
-  std::cout << "================Plys===========" << std::endl;
-  for(int i = 0; i < pt.polySoup.size(); i++) {
-      for(int j = 0; j < 3; j++){
-          std::cout << pt.polySoup[i].idPoints[j] << " ";
-          std::cout << points[pt.polySoup[i].idPoints[j]] << " -> ";
-      }
-      std::cout << std::endl;
-  }
-  std::cout << "=================================" << std::endl;
-
-
-  TriangleSubdivision ts(points, pt.polySoup);
-
-  ts.subdivide();
-
-  std::vector<int> ids2;
-  std::cout << "size " << ts.newPoints.size() << std::endl;
-  for(int i = 0; i < ts.newPoints.size(); i++){
-    std::cout << "voy a insertar " <<
-    ts.newPoints[i].x << " " << ts.newPoints[i].y << std::endl;
-    vtkIdType id = pointsVTK->InsertNextPoint ( ts.newPoints[i].x,
-                                                ts.newPoints[i].y, 0 );
-    ids2.push_back(id);
-  }
-
-  for(int i = 0; i < ts.newSegments.size(); i++){
-      vtkLine *line = vtkLine::New();
-      line->GetPointIds()->SetId(0, ids2[ ts.newSegments[i].idp ]);
-      line->GetPointIds()->SetId(1, ids2[ ts.newSegments[i].idq ]);
-
-      cells->InsertNextCell(line);
-  }
 
   pointsPolydata->SetPoints(pointsVTK);
 
@@ -259,8 +165,6 @@ points.push_back(Point(443, 563));
 
   renderWindow =  vtkSmartPointer<vtkRenderWindow>::New();
 
-
-
   renderWindow->AddRenderer(renderer);
   renderWindow->SetSize( 600, 600 );
 
@@ -270,7 +174,92 @@ points.push_back(Point(443, 563));
     renderWindowInteractor->SetRenderWindow(renderWindow);
 
   renderWindow->Render();
-  renderWindowInteractor->Start();
+  renderWindowInteractor->Initialize();
+  systemPause();
+
+  PolygonTriangulation pt( points );
+
+  pt.triangulate();
+
+  for(int i = 0; i < pt.newSegments.size(); i++){
+      vtkLine *line = vtkLine::New();
+      line->GetPointIds()->SetId(0, ids[ pt.newSegments[i].idp ]);
+      line->GetPointIds()->SetId(1, ids[ pt.newSegments[i].idq ]);
+
+      cells->InsertNextCell(line);
+  }
+
+  renderWindow->Finalize ();
+  renderWindow->Start ();
+  renderWindow->Render();
+
+  systemPause();
+
+
+
+
+  TriangleSubdivision ts(points, pt.polySoup);
+
+  ts.subdivide();
+
+  std::vector<int> ids2;
+
+  for(int i = 0; i < ts.newPoints.size(); i++){
+    vtkIdType id = pointsVTK->InsertNextPoint ( ts.newPoints[i].x,
+                                                ts.newPoints[i].y, 0 );
+    ids2.push_back(id);
+  }
+
+  for(int i = 0; i < ts.newSegments.size(); i++){
+      vtkLine *line = vtkLine::New();
+      line->GetPointIds()->SetId(0, ids2[ ts.newSegments[i].idp ]);
+      line->GetPointIds()->SetId(1, ids2[ ts.newSegments[i].idq ]);
+
+      cells->InsertNextCell(line);
+  }
+
+    renderWindow->Finalize ();
+    renderWindow->Start ();
+    renderWindow->Render();
+
+    systemPause();
+
+  // pointsPolydata->SetPoints(pointsVTK);
+  //
+  //
+  // vertexFilter->SetInputData(pointsPolydata);
+  // vertexFilter->Update();
+  //
+  //  polyData =
+  //   vtkSmartPointer<vtkPolyData>::New();
+  // polyData->ShallowCopy(vertexFilter->GetOutput());
+  //
+  // polyData->SetLines(cells);
+  //
+  // // Visualization
+  // mapper->SetInputData(polyData);
+  //
+  // actor =  vtkSmartPointer<vtkActor>::New();
+  // actor->SetMapper(mapper);
+  // actor->GetProperty()->SetPointSize(5);
+  //
+  // renderer =  vtkSmartPointer<vtkRenderer>::New();
+  // renderer->AddActor(actor);
+  //
+  // renderWindow =  vtkSmartPointer<vtkRenderWindow>::New();
+  //
+  //
+  //
+  // renderWindow->AddRenderer(renderer);
+  // renderWindow->SetSize( 600, 600 );
+  //
+  // renderWindowInteractor =
+  //   vtkSmartPointer<vtkRenderWindowInteractor>::New();
+  //
+  //   renderWindowInteractor->SetRenderWindow(renderWindow);
+  //
+  // renderWindow->Render();
+  // renderWindowInteractor->Start();
 
   return EXIT_SUCCESS;
 }
