@@ -64,7 +64,8 @@ INCLUDE_DIRECTORIES(
 ## =====================
 
 ADD_EXECUTABLE( triangulationClient polygonTriangulation-client.cxx
-               point.cxx  polygonTriangulation.cxx )
+               point.cxx  polygonTriangulation.cxx
+               triangleSubdivision.cxx )
 
 TARGET_LINK_LIBRARIES(triangulationClient ${VTK_LIBRARIES})
 

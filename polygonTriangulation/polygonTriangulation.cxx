@@ -60,11 +60,13 @@ PolygonTriangulation::PolygonTriangulation( std::vector<Point> _points ) {
         typeOfVertices.push_back( typeOfVertex(i) );
         eventQueue.push( Event(i) );
         graph[i].push_back(i+1);
+        graph[i+1].push_back(i);
     }
     edges.push_back( Segment( points.size()-1, 0, id ) );
     typeOfVertices.push_back( typeOfVertex( points.size()-1 ) );
     eventQueue.push( Event(points.size()-1) );
     graph[points.size()-1].push_back(0);
+    graph[0].push_back(points.size()-1);
 }
 
 
@@ -93,7 +95,6 @@ void PolygonTriangulation::triangulate() {
 
         sweep_lineY = pCurr.y;
 
-        std::cout << pCurr << " id " << pId << " type " << typeOfVertices[pId] << std::endl;
 
         if( typeOfVertices[pId] == START ){
             handleStart( eCurr );
@@ -116,7 +117,6 @@ void PolygonTriangulation::triangulate() {
 void PolygonTriangulation::handleStart( Event& eCurr ) {
     int pId = eCurr.pId;
     std::pair<setSegmentIterator, bool> resp = st.insert( edges[pId] );
-    std::cout << "meti " << pId << std::endl;
     segmentIterators[pId] = resp.first;
     helper[pId] = pId;
 }
@@ -158,7 +158,6 @@ void PolygonTriangulation::handleSplit( Event& eCurr ) {
     helper[leftEdge->id] = pId;
 
     std::pair<setSegmentIterator, bool> resp = st.insert( edges[pId] );
-    std::cout << "meti " << pId << std::endl;
     segmentIterators[pId] = resp.first;
     helper[pId] = pId;
 }
@@ -215,7 +214,6 @@ void PolygonTriangulation::handleRegular( Event& eCurr ) {
         st.erase( it );
 
         std::pair<setSegmentIterator, bool> resp = st.insert( edges[pId] );
-        std::cout << "meti " << pId << std::endl;
         segmentIterators[pId] = resp.first;
         helper[pId] = pId;
     } else {
@@ -269,6 +267,7 @@ void PolygonTriangulation::constructPolygons() {
             monotonePolys.push_back( monoPoly );
         }
     }
+    /*
     std::cout << "----------monotone polys ----------------" << std::endl;
     for(int i = 0; i < monotonePolys.size(); i++) {
         for(int j = 0; j < monotonePolys[i].size(); j++) {
@@ -277,6 +276,7 @@ void PolygonTriangulation::constructPolygons() {
         std::cout<<std::endl;
     }
     std::cout << "--------------------------------------" << std::endl;
+    */
 }
 
 std::vector<int> PolygonTriangulation::getMonotonePoly(int first, int second) {
@@ -288,28 +288,43 @@ std::vector<int> PolygonTriangulation::getMonotonePoly(int first, int second) {
     int curr = second;
 
     while(curr != first){
-
         //get the most left turn
-        int lowest = INF;
-        int lowestId = -1;
+        double greatest = 0;
+        int greatestId = -1;
+        bool right = true;
         for(int i = 0; i < graph[curr].size(); i++){
             int currN = graph[curr][i];
             if (currN == prev) continue;
-            int turn = getTurn(points[prev], points[curr], points[currN]);
-
-            if(turn < lowest) {
-                lowest = turn;
-                lowestId = currN;
+            double alpha = getAngle(points[prev], points[curr], points[currN]);
+            bool counterClock = ccw(points[prev], points[curr], points[currN]);
+            if(right == true) {
+                if(!counterClock) {
+                    if(alpha > greatest) {
+                        greatest = alpha;
+                        greatestId = currN;
+                    }
+                } else {
+                    greatest = alpha;
+                    greatestId = currN;
+                    right = false;
+                }
+            } else {
+                if(counterClock) {
+                    if(alpha < greatest) {
+                        greatest = alpha;
+                        greatestId = currN;
+                    }
+                }
             }
         }
         //marcar
-        std::pair<int, int> key(curr, lowestId);
+        std::pair<int, int> key(curr, greatestId);
         if(marcas.find(key) != marcas.end()) {
             marcas[key] = true;
         }
-        monoPoly.push_back(lowestId);
+        monoPoly.push_back(greatestId);
         prev = curr;
-        curr = lowestId;
+        curr = greatestId;
     }
     return monoPoly;
 }
@@ -318,7 +333,6 @@ void PolygonTriangulation::trinagulateMonotonePolys() {
 
     if(monotonePolys.size() == 0) {
         std::vector<int> poly;
-        std::cout << "size " << points.size() << std::endl;
         for(int i = 0; i < points.size(); i++){
             poly.push_back(i);
         }
@@ -331,10 +345,8 @@ void PolygonTriangulation::trinagulateMonotonePolys() {
 }
 
 void PolygonTriangulation::trinagulateMonotonePoly(std::vector<int>& poly) {
-    std::cout << "mi poly" << std::endl;
     std::priority_queue<MonotoneEvent> triangulateQueue;
     for(int i = 0; i < poly.size()-1; i++) {
-        std::cout << "voy a meter" << poly[i] << std::endl;
         triangulateQueue.push(MonotoneEvent(poly[i], i));
     }
 
@@ -350,9 +362,7 @@ void PolygonTriangulation::trinagulateMonotonePoly(std::vector<int>& poly) {
     s.push( std::make_pair<int, int>(top1.pId, top1.pos) );
     s.push( std::make_pair<int, int>(top2.pId, top2.pos) );
 
-    std::cout << "son " <<  top1.pos << " " << top2.pos<< std::endl;
     if( abs(top1.pos - top2.pos) == 1 ) {
-        std::cout << "dif == 1" << std::endl;
         if (top1.pos > top2.pos) {
             chain.push(1);
             chain.push(-1);
@@ -376,31 +386,22 @@ void PolygonTriangulation::trinagulateMonotonePoly(std::vector<int>& poly) {
     for(int i = 2; i < poly.size()-2; i++) {
         curr = triangulateQueue.top();
         triangulateQueue.pop();
-        std::cout << "curr " << curr.pId << " pos " << curr.pos << std::endl;
-        std::cout << "top " << s.top().first << " pos " << s.top().second << std::endl;
         //same chain
         if( (abs(curr.pos - s.top().second) == 1) ||
             (curr.pos == 0       && s.top().second == poly.size()-2) ||
             (s.top().second == 0 && curr.pos == poly.size()-2) ){
-
-                std::cout << "same chain " << chain.top()<< std::endl;
                 top = s.top();
                 s.pop();
                 savedChain = currChain = chain.top();
                 chain.pop();
-                std::cout << "pop de " << top.first << std::endl;
-                std::cout << "voy a probar "<< curr.pId << " " << top.first << " " << s.top().first<< std::endl;
                 while(!s.empty()) {
                     bool sePuede = true;
                     if(currChain == -1) { //right chain
                         if ( !ccw(points[curr.pId],
                                  points[top.first],
                                  points[s.top().first]) ) {
-                                 std::cout << "si se puede dar la vuelta" << std::endl;
                             sePuede = false;
                         }
-                        if(!sePuede)
-                            std::cout << "no se puede dar la vuelta" << std::endl;
                     } else { //left chain
                         if ( ccw(points[curr.pId],
                                  points[top.first],
@@ -410,30 +411,44 @@ void PolygonTriangulation::trinagulateMonotonePoly(std::vector<int>& poly) {
                     }
                     if(!sePuede) break;
 
+                    newSegments.push_back(Segment(curr.pId, s.top().first));
+                    if(currChain == -1) {
+                        polySoup.push_back(
+                            Triangle(curr.pId, top.first, s.top().first) );
+                    } else {
+                        polySoup.push_back(
+                            Triangle(curr.pId, s.top().first,  top.first) );
+                    }
+
                     top = s.top();
                     s.pop();
                     savedChain = chain.top();
                     chain.pop();
-                    newSegments.push_back(Segment(curr.pId, top.first));
+
                 }
                 s.push( top );
                 chain.push(savedChain);
                 s.push( std::make_pair<int, int>(curr.pId, curr.pos) );
                 chain.push(currChain);
 
-
         } else {//different chains
-
-            std::cout << "different chains" << std::endl;
-
             //insert diagonals to stack ponints excepto to last one
             //save top
             savedChain = chain.top();
             top = s.top();
             while(s.size() > 1) {
-                newSegments.push_back(Segment(curr.pId, s.top().first));
+                newSegments.push_back( Segment(curr.pId, s.top().first) );
+                int prev = s.top().first;
                 s.pop();
+                if(savedChain == -1) {
+                    polySoup.push_back(
+                                Triangle(curr.pId, prev, s.top().first) );
+                } else {
+                    polySoup.push_back(
+                                Triangle(curr.pId, s.top().first, prev) );
+                }
                 chain.pop();
+
             }
             s.pop();
             chain.pop();
@@ -443,19 +458,26 @@ void PolygonTriangulation::trinagulateMonotonePoly(std::vector<int>& poly) {
             s.push( std::make_pair<int, int>(curr.pId, curr.pos) );
             chain.push(savedChain * -1);
 
-
-
         }
     }
     curr = triangulateQueue.top();
     triangulateQueue.pop();
     s.pop();
-    while( s.size() > 1) {
-        std::cout << "left " << s.top().first << std::endl;
-        newSegments.push_back(Segment(curr.pId, s.top().first));
-        s.pop();
+    if(s.size() == 1) {
+        int posPrev = curr.pos - 1;
+        if(posPrev == -1) posPrev = poly.size()-1;
+        int posNext = (curr.pos + 1) % poly.size();
+        polySoup.push_back( Triangle(poly[posPrev], curr.pId, poly[posNext]) );
+    } else {
+        while( s.size() > 1 ) {
+            newSegments.push_back(Segment(curr.pId, s.top().first));
+            int prev = s.top().first;
+            s.pop();
+            polySoup.push_back( Triangle(curr.pId, s.top().first, prev) );
+        }
+        //TODO me falta un triangulo acá (no se cual)
+        //polySoup.push_back( Triangle(curr.pId, s.top().first, prev) );
     }
-
 }
 
 void PolygonTriangulation::printGraph() {

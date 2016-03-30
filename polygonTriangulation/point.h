@@ -9,7 +9,7 @@
 
 
 
-class Point{
+class Point {
 public:
     double x;
     double y;
@@ -21,7 +21,7 @@ public:
     friend std::ostream& operator<<(std::ostream&, const Point& p);
 };
 
-class Vec{
+class Vec {
 public:
     double x, y;
 
@@ -30,7 +30,7 @@ public:
     Vec(double _x, double _y) : x(_x), y(_y) {}
 };
 
-class Segment{
+class Segment {
 public:
     int id;
     int idp;
@@ -47,12 +47,18 @@ public:
     }
 };
 
+class Triangle {
+public:
+    int idPoints[3];
+    Triangle(int p, int q, int r);
+};
+
 double randF();
 void randEllipse( double r1, double r2, double cx, double cy, double d,
                   double& x, double& y);
 Vec toVec(Point p, Point q);
 bool ccw(Point p, Point q, Point r);
-double getTurn(Point p, Point q, Point r);
+double getAngle(Point p, Point q, Point r);
 bool collinear(Point p, Point q, Point r);
 
 struct CompByAngleStruct {
