@@ -82,6 +82,7 @@ INCLUDE_DIRECTORIES(
 ADD_EXECUTABLE(
   create_and_show_VoronoiDiagram
   VoronoiFilter.cxx
+  point.cxx
   main.cxx
   )
 TARGET_LINK_LIBRARIES(create_and_show_VoronoiDiagram ${VTK_LIBRARIES})

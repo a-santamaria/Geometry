@@ -7,6 +7,59 @@
 #include <vtkSmartPointer.h>
 
 // -------------------------------------------------------------------------
+double Arc::sweep_lineY = INF;
+Arc::Arc() {}
+
+Arc::Arc(Point first, Point second) {
+    sites = std::make_pair(first, second);
+}
+
+bool Arc::operator< (const Arc& other) const {
+    // this is te case of a degenerate parabola (new site found)
+    if (this->sites.first == other.sites.second) {
+        return (this->sites.first < other.sites.first) ;
+    }
+    return getBreakpoint().x < other.getBreakpoint().x;
+}
+
+Point  Arc::getBreakpoint() const {
+    double sl_2 = sweep_lineY * sweep_lineY;
+
+    double dy1 = (sites.first.y - sweep_lineY);
+    double x1_2 = sites.first.x * sites.first.y;
+    double y1_2 = sites.first.y * sites.first.y;
+
+    double a1 = 0.5 * dy1;
+    double b1 = - sites.first.x / dy1;
+    double c1 = ( x1_2 + y1_2 - sl_2 ) / dy1;
+
+    double dy2 = (sites.second.y - sweep_lineY);
+    double x2_2 = sites.second.x * sites.second.y;
+    double y2_2 = sites.second.y * sites.second.y;
+
+    double a2 = 0.5 * dy2;
+    double b2 = - sites.second.x / dy2;
+    double c2 = ( x2_2 + y2_2 - sl_2 ) / dy2;
+
+    double disc = ( (b1-b2)*(b1-b2) ) - ( 4.0*(a1-a2)*(c1-c2) );
+
+    Point p, q;
+    p.x = ( -(b1-b2) + sqrt( disc ) ) / ( 2.0 * (a1-a2) );
+    q.x = ( -(b1-b2) - sqrt( disc ) ) / ( 2.0 * (a1-a2) );
+
+    p.y = a1*p.x*p.x + b1*p.x + c1;
+    q.y = a2*q.x*q.x + b2*q.x + c2;
+
+    if(sites.first < sites.second) {
+        if( p.x < q.x ) return p;
+        else            return q;
+    } else {
+        if( p.x < q.x ) return q;
+        else            return p;
+    }
+}
+
+// -------------------------------------------------------------------------
 VoronoiFilter* VoronoiFilter::
 New( )
 {
@@ -55,7 +108,7 @@ RequestData(
   // Dummy code
   for( unsigned long i = 0; i < in_points->GetNumberOfPoints( ); ++i )
     out_points->InsertNextPoint( in_points->GetPoint( i ) );
-  
+
   for( unsigned long i = 0; i < in_points->GetNumberOfPoints( ); ++i )
   {
     out_verts->InsertNextCell( 1 );
