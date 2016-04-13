@@ -63,7 +63,8 @@ INCLUDE_DIRECTORIES(
 ## = Compilation rules =
 ## =====================
 
-ADD_EXECUTABLE( triangulationClient polygonTriangulation-client.cxx
+ADD_EXECUTABLE( triangulationClient MACOSX_BUNDLE
+               polygonTriangulation-client.cxx
                point.cxx  polygonTriangulation.cxx
                triangleSubdivision.cxx )
 
