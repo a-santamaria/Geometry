@@ -117,6 +117,7 @@ int main( int argc, char* argv[] )
     {
         double pos[ 3 ];
         seed_rep->GetSeedWorldPosition( i, pos );
+        std::cout << pos[0] << ", " << pos[1] << std::endl;
         input_points->InsertNextPoint( pos );
         input_verts->InsertNextCell( 1 );
         input_verts->InsertCellPoint( i );
@@ -130,7 +131,7 @@ int main( int argc, char* argv[] )
     ActorMiniPipeline input_data_actor;
     input_data_actor.Configure( input_data );
     input_data_actor.Actor->GetProperty( )->SetColor( 0, 1, 0 );
-    input_data_actor.Actor->GetProperty( )->SetPointSize( 20 );
+    input_data_actor.Actor->GetProperty( )->SetPointSize( 10 );
 
     // 11. Compute voronoi
     vtkSmartPointer< VoronoiFilter > vor =
@@ -143,7 +144,7 @@ int main( int argc, char* argv[] )
     vor_actor.Configure( vor->GetOutput( ) );
     vor_actor.Actor->GetProperty( )->SetColor( 1, 1, 0 );
     vor_actor.Actor->GetProperty( )->SetLineWidth( 1 );
-    vor_actor.Actor->GetProperty( )->SetPointSize( 2 );
+    vor_actor.Actor->GetProperty( )->SetPointSize( 5 );
 
     // 13. Show results
     ren->AddActor( input_data_actor.Actor );
