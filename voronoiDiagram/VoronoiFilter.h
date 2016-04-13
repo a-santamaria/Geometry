@@ -4,6 +4,8 @@
 #include <vtkPolyDataAlgorithm.h>
 
 #include "point.h"
+#include <set>
+#include <queue>
 
 struct Arc {
     std::pair<Point, Point> sites;
@@ -14,6 +16,15 @@ struct Arc {
     bool operator< (const Arc& other) const;
     Point getBreakpoint() const;
 
+};
+
+struct Event {
+    Point p;
+    bool isSite;
+
+    Event();
+    Event(Point _p, bool _isSite);
+    bool operator< (const Event& other) const;
 };
 
 class VoronoiFilter : public vtkPolyDataAlgorithm {
@@ -38,6 +49,13 @@ private:
     // Purposely not implemented.
     VoronoiFilter( const VoronoiFilter& other );
     void operator=( const VoronoiFilter& other );
+
+private:
+    std::set<Arc> status;
+    std::priority_queue<Event> eventQueue;
+    void handleSiteEvent(Point p);
+    void handleCircleEvent();
+
 };
 
 #endif // __VORONOIFILTER__H__

@@ -15,6 +15,7 @@ public:
 
     Point() : x(0), y(0) {}
     Point(double _x, double _y) : x(_x), y(_y) {}
+    Point(double* point) : x(point[0]), y(point[1]) {}
 
     bool operator< (const Point& other) const;
     bool operator== (const Point& other) const;

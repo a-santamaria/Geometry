@@ -58,78 +58,83 @@ Point  Arc::getBreakpoint() const {
         else            return p;
     }
 }
-
 // -------------------------------------------------------------------------
-VoronoiFilter* VoronoiFilter::
-New( )
-{
+Event::Event() {}
+Event::Event(Point _p, bool _isSite) : p(_p), isSite(_isSite) {}
+bool Event::operator< (const Event& other) const {
+    return p < other.p;
+}
+// -------------------------------------------------------------------------
+VoronoiFilter* VoronoiFilter::New( ) {
   return( new VoronoiFilter( ) );
 }
 
 // -------------------------------------------------------------------------
-VoronoiFilter::
-VoronoiFilter( )
-  : vtkPolyDataAlgorithm( )
-{
-}
+VoronoiFilter::VoronoiFilter( ) : vtkPolyDataAlgorithm( ) {}
 
 // -------------------------------------------------------------------------
-VoronoiFilter::
-~VoronoiFilter( )
-{
-}
+VoronoiFilter::~VoronoiFilter( ) {}
 
 // -------------------------------------------------------------------------
-int VoronoiFilter::
-RequestData(
-  vtkInformation* request,
-  vtkInformationVector** input,
-  vtkInformationVector* output
-  )
+int VoronoiFilter::RequestData( vtkInformation* request,
+                                vtkInformationVector** input,
+                                vtkInformationVector* output
+                                )
 {
-  // Get input
-  vtkInformation* input_info = input[ 0 ]->GetInformationObject( 0 );
-  vtkPolyData* in = vtkPolyData::SafeDownCast(
-    input_info->Get( vtkDataObject::DATA_OBJECT( ) )
-    );
-  vtkPoints* in_points = in->GetPoints( );
+    // Get input
+    vtkInformation* input_info = input[ 0 ]->GetInformationObject( 0 );
+    vtkPolyData* in = vtkPolyData::SafeDownCast(
+        input_info->Get( vtkDataObject::DATA_OBJECT( ) )
+        );
+    vtkPoints* in_points = in->GetPoints( );
 
-  // Get output
-  vtkInformation* output_info = output->GetInformationObject( 0 );
-  vtkPolyData* out = vtkPolyData::SafeDownCast(
-    output_info->Get( vtkDataObject::DATA_OBJECT( ) )
-    );
+    // Get output
+    vtkInformation* output_info = output->GetInformationObject( 0 );
+    vtkPolyData* out = vtkPolyData::SafeDownCast(
+        output_info->Get( vtkDataObject::DATA_OBJECT( ) )
+        );
 
-  // Real output objects
-  vtkPoints* out_points = vtkPoints::New( );
-  vtkCellArray* out_lines = vtkCellArray::New( );
-  vtkCellArray* out_verts = vtkCellArray::New( );
+    // Real output objects
+    vtkPoints* out_points = vtkPoints::New( );
+    vtkCellArray* out_lines = vtkCellArray::New( );
+    vtkCellArray* out_verts = vtkCellArray::New( );
 
-  // Dummy code
-  for( unsigned long i = 0; i < in_points->GetNumberOfPoints( ); ++i )
-    out_points->InsertNextPoint( in_points->GetPoint( i ) );
+    // Add sites to eventQueue
+    for( unsigned long i = 0; i < in_points->GetNumberOfPoints( ); ++i ) {
+        eventQueue.push( Event( Point( in_points->GetPoint( i ) ), true ) );
+        out_points->InsertNextPoint( in_points->GetPoint( i ) );
+    }
 
-  for( unsigned long i = 0; i < in_points->GetNumberOfPoints( ); ++i )
-  {
-    out_verts->InsertNextCell( 1 );
-    out_verts->InsertCellPoint( i );
-    for( unsigned long j = i + 1; j < in_points->GetNumberOfPoints( ); ++j )
-    {
-      out_lines->InsertNextCell( 2 );
-      out_lines->InsertCellPoint( i );
-      out_lines->InsertCellPoint( j );
+    if(eventQueue.size() >= 2) {
+        Event curr = eventQueue.top();
+        eventQueue.pop();
+        Arc a(curr.p, eventQueue.top().p);
+        eventQueue.pop();
+        while( !eventQueue.empty() ) {
+            Event curr = eventQueue.top();
+            eventQueue.pop();
+            if(curr.isSite) handleSiteEvent(curr.p);
+            else            handleCircleEvent();
+        }
+    }
 
-    } // rof
 
-  } // rof
+    // Associate output objects
+    out->SetPoints( out_points );
+    out->SetLines( out_lines );
+    out->SetVerts( out_verts );
 
-  // Associate output objects
-  out->SetPoints( out_points );
-  out->SetLines( out_lines );
-  out->SetVerts( out_verts );
-
-  // Always return like this
-  return( 1 );
+    // Always return like this
+    return( 1 );
+}
+// -------------------------------------------------------------------------
+void VoronoiFilter::handleSiteEvent(Point p) {
+    std::set<Arc>::iterator it;
+    //TODO no se si esto sirva
+    it = status.upper_bound( Arc(p, p) );
 }
 
+void VoronoiFilter::handleCircleEvent() {
+
+}
 // eof - VoronoiFilter.cxx
