@@ -13,7 +13,7 @@ Arc::Arc() {}
 Arc::Arc(Point first, Point second) {
     sites = std::make_pair(first, second);
 }
-Point mid;
+std::vector<Point> mids;
 bool primer = true;
 bool Arc::operator< (const Arc& other) const {
     // this is te case of a degenerate parabola (new site found)
@@ -45,36 +45,36 @@ double  Arc::getBreakpointX() const {
     double y1_2 = sites.first.y * sites.first.y;
 
     double a1 = 1.0 / (2.0 * dy1);
-    double b1 = - sites.first.x / dy1;
-    double c1 = ( x1_2 + y1_2 - sl_2 ) / ( 2.0 * dy1 );
+    double b1 = - sites.first.x;
+    double c1 = ( y1_2 - sl_2 ) / ( 2.0 * dy1 );
 
     double dy2 = sites.second.y - sweep_lineY;
     double x2_2 = sites.second.x * sites.second.y;
     double y2_2 = sites.second.y * sites.second.y;
 
     double a2 =  1.0 / (2.0 * dy2);
-    double b2 = - sites.second.x / dy2;
-    double c2 = ( x2_2 + y2_2 - sl_2 ) / ( 2.0 * dy2 );
+    double b2 = - sites.second.x;
+    double c2 = ( y2_2 - sl_2 ) / ( 2.0 * dy2 );
 
-    double disc = ( (b1-b2)*(b1-b2) ) - ( 4.0*(a1-a2)*(c1-c2) );
+    double A = (a1 - a2);
+    double B = 2.0 * (a1*b1 - a2*b2);
+    double C = a1*b1*b1 - a2*b2*b2 + (c1-c2);
+
+
+    double disc = ( B*B ) - ( 4.0*A*C );
     if(disc < 0) std::cout << "disc es negativo" << std::endl;
-    double x1 = ( -(b1-b2) + sqrt( disc ) ) / ( 2.0 * (a1-a2) );
-    double x2 = ( -(b1-b2) - sqrt( disc ) ) / ( 2.0 * (a1-a2) );
+    double x1 = ( -B + sqrt( disc ) ) / ( 2.0 * A );
+    double x2 = ( -B - sqrt( disc ) ) / ( 2.0 * A );
 
-    std::cout << "x1 " << x1 << " x2 " << x2 << std::endl;
-    double y1 = a1*x1*x1 + b1*x1 + c1;
-    double y2 = a2*x2*x2 + b2*x2 + c2;
-    if(primer) {
-        mid.x = x1; mid.y = y1;
-        std::cout << "mid " << mid << std::endl;
-        primer = false;
-    }
+    double y1 = a1* (x1+b1)*(x1+b1) + c1;
+    double y2 = a2* (x2+b2)*(x2+b2) + c2;
+
     if(sites.first < sites.second) {
-        if( x1 < x2 ) return x2;
-        else          return x1;
+        if( x1 < x2 ) { mids.push_back(Point(x2, y2)); return x2; }
+        else          { mids.push_back(Point(x1, y1)); return x1; }
     } else {
-        if( x1 < x2 ) return x1;
-        else          return x2;
+        if( x1 < x2 ) { mids.push_back(Point(x1, y1)); return x1; }
+        else          { mids.push_back(Point(x2, y2)); return x2; }
     }
 }
 // -------------------------------------------------------------------------
@@ -125,15 +125,14 @@ int VoronoiFilter::RequestData( vtkInformation* request,
         eventQueue.push( Event( Point( in_points->GetPoint( i ) ), true ) );
 
         /** testing **/
+        /*
         if( i == 2) continue;
         std::vector<Point> vec =  getPoints( Point( in_points->GetPoint( i ) ) );
         for(int i = 0; i < vec.size() ; i++) {
             double ppp[3] = {vec[i].x, vec[i].y, 0.0};
             out_points->InsertNextPoint( ppp );
         }
-    }
-    for(double i = 0; i < 600 ; i+=50) {
-        out_points->InsertNextPoint( i, Arc::sweep_lineY, 0 );
+        */
     }
 
     if(eventQueue.size() >= 2) {
@@ -160,11 +159,12 @@ int VoronoiFilter::RequestData( vtkInformation* request,
         }
     }
     double pp[3];
-    std::cout << "mid " << mid << std::endl;
-    pp[0] = mid.x;
-    pp[1] = mid.y;
-    pp[2] = 0;
-    out_points->InsertNextPoint( pp );
+    for(int i = 0; i < mids.size(); i++) {
+        pp[0] = mids[i].x;
+        pp[1] = mids[i].y;
+        pp[2] = 0;
+        out_points->InsertNextPoint( pp );
+    }
 
     std::cout << "points " << out_points->GetNumberOfPoints() << std::endl;
 
@@ -233,22 +233,19 @@ void VoronoiFilter::printBeachLine() {
 
 
 std::vector<Point> VoronoiFilter::getPoints(Point site) {
-    std::cout << "entre a get points" << std::endl;
     std::vector<Point> vec;
     double sl_2 = Arc::sweep_lineY * Arc::sweep_lineY;
-    std::cout << "site " << site << std::endl;
-    std::cout << "sl " << Arc::sweep_lineY << std::endl;
     double dy1 = site.y - Arc::sweep_lineY;
-    std::cout << "---------------->dy " << dy1 << std::endl;
     double x1_2 = site.x * site.y;
     double y1_2 = site.y * site.y;
 
     double a1 = 1.0 / (2.0 * dy1);
-    double b1 = - site.x / dy1;
-    double c1 = ( x1_2 + y1_2 - sl_2 ) / ( 2.0 * dy1 );
+    double b1 = - site.x;
+    double c1 = ( y1_2 - sl_2 ) / ( 2.0 * dy1 );
     std::cout << "a " << a1 << " b " << b1 << " c " << c1 << std::endl;
     for(double i = site.x-250; i < site.x+250; i+=20) {
-        double y = (a1*i*i + b1*i + c1);
+        /*double y = (a1*i*i + b1*i + c1);*/
+        double y = a1 * (i+b1)*(i+b1) + c1;
         /*std::cout << "al centro: ";
         std::cout << sqrt( (site.x - i)*(site.x - i) + (site.y - y)*(site.y - y) );
         std::cout << " -- a linea: " << y - Arc::sweep_lineY << std::endl;

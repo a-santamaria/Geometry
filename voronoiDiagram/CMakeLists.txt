@@ -81,6 +81,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_EXECUTABLE(
   create_and_show_VoronoiDiagram
+  MACOSX_BUNDLE
   VoronoiFilter.cxx
   point.cxx
   main.cxx
