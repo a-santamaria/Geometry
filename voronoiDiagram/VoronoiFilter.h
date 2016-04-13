@@ -6,6 +6,8 @@
 #include "point.h"
 #include <set>
 #include <queue>
+#include <map>
+#include <vector>
 
 struct Arc {
     std::pair<Point, Point> sites;
@@ -14,7 +16,7 @@ struct Arc {
     Arc();
     Arc(Point first, Point second);
     bool operator< (const Arc& other) const;
-    Point getBreakpoint() const;
+    double getBreakpointX() const;
 
 };
 
@@ -53,8 +55,12 @@ private:
 private:
     std::set<Arc> status;
     std::priority_queue<Event> eventQueue;
+    std::map<Point, Event> circleEvents;
+
     void handleSiteEvent(Point p);
     void handleCircleEvent();
+    void printBeachLine();
+    std::vector<Point> getPoints(Point site);
 
 };
 
