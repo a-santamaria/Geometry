@@ -14,23 +14,26 @@ Arc::Arc(Point first, Point second) {
     sites = std::make_pair(first, second);
 }
 std::vector<Point> mids;
-bool primer = true;
 bool Arc::operator< (const Arc& other) const {
-    // this is te case of a degenerate parabola (new site found)
-    if (this->sites.first == other.sites.second) {
-        return (this->sites.first < other.sites.first) ;
-    }
-    std::cout << "voy a comparar: " ;
-    std::cout << "<" << sites.first;
-    std::cout << "-" << sites.second << ">";
-    std::cout << " con " << std::endl;
-    std::cout << "<" << other.sites.first;
-    std::cout << "-" << other.sites.second << ">";
-    std::cout << std::endl;
+
+    // std::cout << "voy a comparar: " ;
+    // std::cout << "<" << sites.first.x;
+    // std::cout << "-" << sites.second.x << ">";
+    // std::cout << " con ";
+    // std::cout << "<" << other.sites.first.x;
+    // std::cout << "-" << other.sites.second.x << ">";
+    // std::cout << std::endl;
+
+    // these are the cases for a degenerate parabola
+    if( this->sites.second.y == sweep_lineY &&
+        other.sites.first.y == sweep_lineY ) return true;
+    if( this->sites.first.y == sweep_lineY &&
+        other.sites.second.y == sweep_lineY ) return false;
+
     double thisBreackPoint = getBreakpointX();
     double otherBreakPoint = other.getBreakpointX();
-    std::cout << "break point: " << thisBreackPoint << " <-> ";
-    std::cout << otherBreakPoint << std::endl;
+    // std::cout << "break point: " << thisBreackPoint << " <-> ";
+    // std::cout << otherBreakPoint << std::endl;
     return thisBreackPoint < otherBreakPoint;
 }
 
@@ -38,8 +41,16 @@ double  Arc::getBreakpointX() const {
 
     if( sites.first == sites.second ) return sites.first.x;
 
+    if( sites.first.y == sweep_lineY ) {
+        return sites.first.x;
+    }
+
+    if( sites.second.y == sweep_lineY ) {
+        return sites.second.x;
+    }
+
     double sl_2 = sweep_lineY * sweep_lineY;
-    std::cout << " sl " << sweep_lineY << std::endl;
+
     double dy1 = sites.first.y - sweep_lineY;
     double x1_2 = sites.first.x * sites.first.y;
     double y1_2 = sites.first.y * sites.first.y;
@@ -70,16 +81,24 @@ double  Arc::getBreakpointX() const {
     double y2 = a2* (x2+b2)*(x2+b2) + c2;
 
     if(sites.first < sites.second) {
-        if( x1 < x2 ) { mids.push_back(Point(x2, y2)); return x2; }
-        else          { mids.push_back(Point(x1, y1)); return x1; }
+        if( x1 < x2 ) { /*mids.push_back(Point(x2, y2));*/ return x2; }
+        else          { /*mids.push_back(Point(x1, y1));*/ return x1; }
     } else {
-        if( x1 < x2 ) { mids.push_back(Point(x1, y1)); return x1; }
-        else          { mids.push_back(Point(x2, y2)); return x2; }
+        if( x1 < x2 ) { /*mids.push_back(Point(x1, y1));*/ return x1; }
+        else          { /*mids.push_back(Point(x2, y2));*/ return x2; }
     }
 }
 // -------------------------------------------------------------------------
 Event::Event() {}
-Event::Event(Point _p, bool _isSite) : p(_p), isSite(_isSite) {}
+Event::Event(Point _p) : p(_p), isSite(true) {}
+
+Event::Event( Point _p,
+              std::set<Arc>::iterator _leftArc,
+              std::set<Arc>::iterator _rightArc,
+              Point _center) :
+              p(_p), leftArc(_leftArc), rightArc(_rightArc), center(_center),
+              isSite(false) {}
+
 bool Event::operator< (const Event& other) const {
     return p < other.p;
 }
@@ -122,7 +141,7 @@ int VoronoiFilter::RequestData( vtkInformation* request,
 
     // Add sites to eventQueue
     for( unsigned long i = 0; i < in_points->GetNumberOfPoints( ); ++i ) {
-        eventQueue.push( Event( Point( in_points->GetPoint( i ) ), true ) );
+        eventQueue.push( Event( Point( in_points->GetPoint( i ) ) ) );
 
         /** testing **/
         /*
@@ -148,7 +167,7 @@ int VoronoiFilter::RequestData( vtkInformation* request,
         }
 
         status.insert(a);
-
+        printBeachLine();
         while( !eventQueue.empty() ) {
             Event curr = eventQueue.top();
             std::cout << "curr " << curr.p << std::endl;
@@ -156,8 +175,11 @@ int VoronoiFilter::RequestData( vtkInformation* request,
             eventQueue.pop();
             if(curr.isSite) handleSiteEvent(curr.p);
             else            handleCircleEvent();
+            printBeachLine();
         }
     }
+
+    /** testing **/
     double pp[3];
     for(int i = 0; i < mids.size(); i++) {
         pp[0] = mids[i].x;
@@ -185,34 +207,44 @@ int VoronoiFilter::RequestData( vtkInformation* request,
 }
 // -------------------------------------------------------------------------
 void VoronoiFilter::handleSiteEvent(Point p) {
-    std::set<Arc>::iterator itHi, itLo;
-    //TODO no se si esto sirva
-    printBeachLine();
-    Arc a (p,p);
-    std::cout << "voy a hacer upper bound" << std::endl;
-    itHi = status.upper_bound( a );
-    std::cout << "voy a hacer lower bound" << std::endl;
-    itLo = status.lower_bound( a );
-    //TODO check for cirlce event
+    std::set<Arc>::iterator itHi, itLo, itCurrL, itCurrR;
+    std::set<Arc>::reverse_iterator itrLo;
 
-    if(itLo == status.end()) {
-        std::cout << "lo: end" << std::endl;
-    } else {
+    Arc a (p,p);
+    itHi = status.upper_bound( a );
+
+    if(itHi != status.end()) {
+        std::cout << "hi: ";
+        std::cout << "<" << itHi->sites.first;
+        std::cout << "-" << itHi->sites.second << ">";
+        if( itHi != status.begin() ) {
+            itLo = itHi--;
+            std::cout << "lo: ";
+            std::cout << "<" << itLo->sites.first;
+            std::cout << "-" << itLo->sites.second << ">";
+            std::cout << std::endl;
+            addLeftCircleEvent(p, itLo, itCurrL);
+            addRightCircleEvent(p, itHi, itCurrR);
+        } else { // new site is first in x
+            addRightCircleEvent(p, itHi, itCurrR);
+
+        }
+    } else { // new site is last in x
+        auto itLo = status.end();
+        itLo--;
         std::cout << "lo: ";
         std::cout << "<" << itLo->sites.first;
         std::cout << "-" << itLo->sites.second << ">";
         std::cout << std::endl;
-    }
-    if(itHi == status.end()) {
-        std::cout << "hi: end" << std::endl;
-    } else {
-        std::cout << "hi: ";
-        std::cout << "<" << itHi->sites.first;
-        std::cout << "-" << itHi->sites.second << ">";
-        std::cout << std::endl;
+        /** insert new break points **/
+        itCurrL = ( status.insert( Arc(itLo->sites.second, p) ) ).first;
+        itCurrR = ( status.insert( Arc(p, itLo->sites.second) ) ).first;
+        addLeftCircleEvent(p, itLo, itCurrL);
     }
 
-    printBeachLine();
+    /** insert new break points **/
+    itCurrL = ( status.insert( Arc(itHi->sites.first, p) ) ).first;
+    itCurrR = ( status.insert( Arc(p, itHi->sites.first) ) ).first;
 }
 
 void VoronoiFilter::handleCircleEvent() {
@@ -223,8 +255,8 @@ void VoronoiFilter::printBeachLine() {
     std::set<Arc>::iterator it;
     std::cout << "-----------------beach line--------------------" << std::endl;
     for(it = status.begin();  it != status.end(); it++) {
-        std::cout << "<" << it->sites.first.x << ", " << it->sites.first.x;
-        std::cout << "-" << it->sites.second.x << ", " << it->sites.second.x << ">";
+        std::cout << "<" << it->sites.first.x;
+        std::cout << " - " << it->sites.second.x << ">";
         std::cout << " -> ";
     }
     std::cout << std::endl;
@@ -239,6 +271,34 @@ Point VoronoiFilter::circleCenter(Point p, Point q, Point r) {
     double x = num / ( 2.0 * ( mr - mt ) );
     double y = ( -1.0/mr ) * ( x - ( (p.x+q.x) / 2.0 ) ) + ( (p.y+q.y) / 2.0 );
     return Point(x, y);
+}
+
+void VoronoiFilter::addRightCircleEvent(Point& p, std::set<Arc>::iterator& itHi,
+                                   std::set<Arc>::iterator& itCurrR) {
+    Point center = circleCenter( p, itHi->sites.first, itHi->sites.second );
+    mids.push_back(center);
+    //TODO check if it converges ??
+    double dx = center.x - p.x;
+    double dy = center.y - p.y;
+    double r = sqrt( dx*dx + dy*dy );
+    Point lowest( center.x, center.y - r );
+    // std::cout << "add circle r at " << center << std::endl;
+    // std::cout << "from " << p << " <-> " <<itHi->sites.first<< " <-> "<<itHi->sites.second << std::endl;
+    eventQueue.push( Event( lowest, itCurrR, itHi, center ) );
+}
+
+void VoronoiFilter::addLeftCircleEvent(Point& p, std::set<Arc>::iterator& itLo,
+                    std::set<Arc>::iterator& itCurrL) {
+    Point center = circleCenter( p, itLo->sites.first, itLo->sites.second );
+    mids.push_back(center);
+    //TODO check if it converges ??
+    double dx = center.x - p.x;
+    double dy = center.y - p.y;
+    double r = sqrt( dx*dx + dy*dy );
+    Point lowest( center.x, center.y - r );
+    // std::cout << "add circle l at " << center << std::endl;
+    // std::cout << "from " << p << " <-> " <<itLo->sites.first<< " <-> "<<itLo->sites.second << std::endl;
+    eventQueue.push( Event( lowest, itLo, itCurrL, center ) );
 }
 
 

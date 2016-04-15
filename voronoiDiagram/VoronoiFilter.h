@@ -24,8 +24,16 @@ struct Event {
     Point p;
     bool isSite;
 
+    std::set<Arc>::iterator leftArc;
+    std::set<Arc>::iterator rightArc;
+    Point center;
+
     Event();
-    Event(Point _p, bool _isSite);
+    Event(Point _p);
+    Event( Point _p,
+           std::set<Arc>::iterator _leftArc,
+           std::set<Arc>::iterator _rightArc,
+           Point _center );
     bool operator< (const Event& other) const;
 };
 
@@ -60,7 +68,12 @@ private:
     void handleSiteEvent(Point p);
     void handleCircleEvent();
     void printBeachLine();
-
+    void addRightCircleEvent(Point& p, std::set<Arc>::iterator& itHi,
+                             std::set<Arc>::iterator& itCurrR);
+    void addLeftCircleEvent(Point& p, std::set<Arc>::iterator& itLo,
+                            std::set<Arc>::iterator& itCurrL);
+                            void addLeftCircleEvent(Point& p, std::set<Arc>::reverse_iterator& itLo,
+                                                    std::set<Arc>::iterator& itCurrL);
     std::vector<Point> getPoints(Point site);
     Point circleCenter(Point p, Point q, Point r);
 
