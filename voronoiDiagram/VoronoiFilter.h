@@ -60,7 +60,9 @@ private:
     void handleSiteEvent(Point p);
     void handleCircleEvent();
     void printBeachLine();
+
     std::vector<Point> getPoints(Point site);
+    Point circleCenter(Point p, Point q, Point r);
 
 };
 

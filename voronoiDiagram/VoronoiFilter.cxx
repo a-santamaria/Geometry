@@ -231,6 +231,16 @@ void VoronoiFilter::printBeachLine() {
     std::cout << "------------------------------------------" << std::endl;
 }
 
+Point VoronoiFilter::circleCenter(Point p, Point q, Point r) {
+    double mr = (q.y-p.y) / (q.x-p.x);
+    double mt = (r.y-q.y) / (r.x-q.x);
+
+    double num = mr*mt*(r.y-p.y) + mr*(q.x+r.x) - mt*(p.x+q.x);
+    double x = num / ( 2.0 * ( mr - mt ) );
+    double y = ( -1.0/mr ) * ( x - ( (p.x+q.x) / 2.0 ) ) + ( (p.y+q.y) / 2.0 );
+    return Point(x, y);
+}
+
 
 std::vector<Point> VoronoiFilter::getPoints(Point site) {
     std::vector<Point> vec;
