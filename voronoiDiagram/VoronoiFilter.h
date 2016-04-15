@@ -72,8 +72,6 @@ private:
                              std::set<Arc>::iterator& itCurrR);
     void addLeftCircleEvent(Point& p, std::set<Arc>::iterator& itLo,
                             std::set<Arc>::iterator& itCurrL);
-                            void addLeftCircleEvent(Point& p, std::set<Arc>::reverse_iterator& itLo,
-                                                    std::set<Arc>::iterator& itCurrL);
     std::vector<Point> getPoints(Point site);
     Point circleCenter(Point p, Point q, Point r);
 
