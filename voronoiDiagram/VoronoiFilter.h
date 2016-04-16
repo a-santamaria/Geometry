@@ -9,10 +9,11 @@
 #include <map>
 #include <vector>
 
+
 struct Arc {
     std::pair<Point, Point> sites;
     static double sweep_lineY;
-
+    bool hasCircleEvent;
     Arc();
     Arc(Point first, Point second);
     bool operator< (const Arc& other) const;
@@ -36,6 +37,8 @@ struct Event {
            Point _center );
     bool operator< (const Event& other) const;
 };
+
+typedef std::set<Event>::iterator eventIterator;
 
 class VoronoiFilter : public vtkPolyDataAlgorithm {
 public:
@@ -62,8 +65,7 @@ private:
 
 private:
     std::set<Arc> status;
-    std::priority_queue<Event> eventQueue;
-    std::map<Point, Event> circleEvents;
+    std::set<Event> eventQueue;
 
     void handleSiteEvent(Point p);
     void handleCircleEvent();

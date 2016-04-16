@@ -100,7 +100,7 @@ Event::Event( Point _p,
               isSite(false) {}
 
 bool Event::operator< (const Event& other) const {
-    return p < other.p;
+    return other.p < p;
 }
 // -------------------------------------------------------------------------
 VoronoiFilter* VoronoiFilter::New( ) {
@@ -141,7 +141,7 @@ int VoronoiFilter::RequestData( vtkInformation* request,
 
     // Add sites to eventQueue
     for( unsigned long i = 0; i < in_points->GetNumberOfPoints( ); ++i ) {
-        eventQueue.push( Event( Point( in_points->GetPoint( i ) ) ) );
+        eventQueue.insert( Event( Point( in_points->GetPoint( i ) ) ) );
 
         /** testing **/
         /*
@@ -154,11 +154,14 @@ int VoronoiFilter::RequestData( vtkInformation* request,
         */
     }
 
+    eventIterator it;
     if(eventQueue.size() >= 2) {
-        Point p = eventQueue.top().p;
-        eventQueue.pop();
-        Point q = eventQueue.top().p;
-        eventQueue.pop();
+        it = eventQueue.begin();
+        Point p = it->p;
+        eventQueue.erase(it);
+        it = eventQueue.begin();
+        Point q = it->p;
+        eventQueue.erase(it);
         Arc a(p, q);
 
         if(q.x < p.x) {
@@ -169,10 +172,11 @@ int VoronoiFilter::RequestData( vtkInformation* request,
         status.insert(a);
         printBeachLine();
         while( !eventQueue.empty() ) {
-            Event curr = eventQueue.top();
+            it = eventQueue.begin();
+            Event curr = *it;
             std::cout << "curr " << curr.p << std::endl;
             Arc::sweep_lineY = curr.p.y;
-            eventQueue.pop();
+            eventQueue.erase(it);
             if(curr.isSite) handleSiteEvent(curr.p);
             else            handleCircleEvent();
             printBeachLine();
@@ -284,7 +288,7 @@ void VoronoiFilter::addRightCircleEvent(Point& p, std::set<Arc>::iterator& itHi,
     Point lowest( center.x, center.y - r );
     // std::cout << "add circle r at " << center << std::endl;
     // std::cout << "from " << p << " <-> " <<itHi->sites.first<< " <-> "<<itHi->sites.second << std::endl;
-    eventQueue.push( Event( lowest, itCurrR, itHi, center ) );
+    eventQueue.insert( Event( lowest, itCurrR, itHi, center ) );
 }
 
 void VoronoiFilter::addLeftCircleEvent(Point& p, std::set<Arc>::iterator& itLo,
@@ -298,7 +302,7 @@ void VoronoiFilter::addLeftCircleEvent(Point& p, std::set<Arc>::iterator& itLo,
     Point lowest( center.x, center.y - r );
     // std::cout << "add circle l at " << center << std::endl;
     // std::cout << "from " << p << " <-> " <<itLo->sites.first<< " <-> "<<itLo->sites.second << std::endl;
-    eventQueue.push( Event( lowest, itLo, itCurrL, center ) );
+    eventQueue.insert( Event( lowest, itLo, itCurrL, center ) );
 }
 
 
