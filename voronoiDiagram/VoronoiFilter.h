@@ -9,15 +9,19 @@
 #include <map>
 #include <vector>
 
+struct Event;
+typedef std::set<Event>::iterator eventIterator;
 
 struct Arc {
     std::pair<Point, Point> sites;
     static double sweep_lineY;
-    bool hasCircleEvent;
+    mutable bool hasCircleEvent;
+    mutable eventIterator itCircle;
+    int idEdge;
     Arc();
-    Arc(Point first, Point second);
+    Arc(Point first, Point second, int _idEdge);
     bool operator< (const Arc& other) const;
-    double getBreakpointX() const;
+    Point getBreakpoint() const;
 
 };
 
@@ -37,8 +41,6 @@ struct Event {
            Point _center );
     bool operator< (const Event& other) const;
 };
-
-typedef std::set<Event>::iterator eventIterator;
 
 class VoronoiFilter : public vtkPolyDataAlgorithm {
 public:
@@ -66,6 +68,8 @@ private:
 private:
     std::set<Arc> status;
     std::set<Event> eventQueue;
+    std::vector<Point> points;
+    std::vector<std::pair<int, int> > edgeList;
 
     void handleSiteEvent(Point p);
     void handleCircleEvent();

@@ -10,8 +10,9 @@
 double Arc::sweep_lineY = INF;
 Arc::Arc() {}
 
-Arc::Arc(Point first, Point second) {
+Arc::Arc(Point first, Point second, int _idEdge) : idEdge(_idEdge) {
     sites = std::make_pair(first, second);
+    hasCircleEvent = false;
 }
 std::vector<Point> mids;
 bool Arc::operator< (const Arc& other) const {
@@ -30,23 +31,23 @@ bool Arc::operator< (const Arc& other) const {
     if( this->sites.first.y == sweep_lineY &&
         other.sites.second.y == sweep_lineY ) return false;
 
-    double thisBreackPoint = getBreakpointX();
-    double otherBreakPoint = other.getBreakpointX();
+    double thisBreackPoint = getBreakpoint().x;
+    double otherBreakPoint = other.getBreakpoint().x;
     // std::cout << "break point: " << thisBreackPoint << " <-> ";
     // std::cout << otherBreakPoint << std::endl;
     return thisBreackPoint < otherBreakPoint;
 }
 
-double  Arc::getBreakpointX() const {
+Point  Arc::getBreakpoint() const {
 
-    if( sites.first == sites.second ) return sites.first.x;
+    if( sites.first == sites.second ) return sites.first;
 
     if( sites.first.y == sweep_lineY ) {
-        return sites.first.x;
+        return sites.first;
     }
 
     if( sites.second.y == sweep_lineY ) {
-        return sites.second.x;
+        return sites.second;
     }
 
     double sl_2 = sweep_lineY * sweep_lineY;
@@ -79,13 +80,14 @@ double  Arc::getBreakpointX() const {
 
     double y1 = a1* (x1+b1)*(x1+b1) + c1;
     double y2 = a2* (x2+b2)*(x2+b2) + c2;
-
+    Point p1(x1, y1);
+    Point p2(x2, y2);
     if(sites.first < sites.second) {
-        if( x1 < x2 ) { /*mids.push_back(Point(x2, y2));*/ return x2; }
-        else          { /*mids.push_back(Point(x1, y1));*/ return x1; }
+        if( x1 < x2 ) { /*mids.push_back(Point(x2, y2));*/ return p2; }
+        else          { /*mids.push_back(Point(x1, y1));*/ return p1; }
     } else {
-        if( x1 < x2 ) { /*mids.push_back(Point(x1, y1));*/ return x1; }
-        else          { /*mids.push_back(Point(x2, y2));*/ return x2; }
+        if( x1 < x2 ) { /*mids.push_back(Point(x1, y1));*/ return p1; }
+        else          { /*mids.push_back(Point(x2, y2));*/ return p2; }
     }
 }
 // -------------------------------------------------------------------------
@@ -162,7 +164,9 @@ int VoronoiFilter::RequestData( vtkInformation* request,
         it = eventQueue.begin();
         Point q = it->p;
         eventQueue.erase(it);
-        Arc a(p, q);
+        edgeList.push_back( std::make_pair(0, INF) );
+        Arc a(p, q, 0);
+        points.push_back( a.getBreakpoint() );
 
         if(q.x < p.x) {
             a.sites.first = q;
@@ -214,10 +218,20 @@ void VoronoiFilter::handleSiteEvent(Point p) {
     std::set<Arc>::iterator itHi, itLo, itCurrL, itCurrR;
     std::set<Arc>::reverse_iterator itrLo;
 
-    Arc a (p,p);
+    Arc a (p,p, 0);
     itHi = status.upper_bound( a );
 
+    //create new edge in graph
+    edgeList.push_back(std::make_pair(INF, INF));
+    int idE = edgeList.size()-1;
+
     if(itHi != status.end()) {
+
+        if(itHi->hasCircleEvent) {
+            //false alarm
+            eventQueue.erase(itHi->itCircle);
+        }
+
         std::cout << "hi: ";
         std::cout << "<" << itHi->sites.first;
         std::cout << "-" << itHi->sites.second << ">";
@@ -227,9 +241,24 @@ void VoronoiFilter::handleSiteEvent(Point p) {
             std::cout << "<" << itLo->sites.first;
             std::cout << "-" << itLo->sites.second << ">";
             std::cout << std::endl;
+
+            /** insert new break points **/
+            itCurrL = ( status.insert( Arc(itHi->sites.first, p, idE) ) ).first;
+            itCurrR = ( status.insert( Arc(p, itHi->sites.first, idE) ) ).first;
+
             addLeftCircleEvent(p, itLo, itCurrL);
             addRightCircleEvent(p, itHi, itCurrR);
+
         } else { // new site is first in x
+            /** this is to handle infinite edges **/
+            Arc a(p, itHi->sites.first, idE);
+            Point bp = a.getBreakpoint();
+            points.push_back(bp);
+            edgeList[edgeList.size()-1].first = points.size()-1;
+
+            /** insert new arc **/
+            itCurrR = ( status.insert( a ) ).first;
+
             addRightCircleEvent(p, itHi, itCurrR);
 
         }
@@ -240,15 +269,19 @@ void VoronoiFilter::handleSiteEvent(Point p) {
         std::cout << "<" << itLo->sites.first;
         std::cout << "-" << itLo->sites.second << ">";
         std::cout << std::endl;
-        /** insert new break points **/
-        itCurrL = ( status.insert( Arc(itLo->sites.second, p) ) ).first;
-        itCurrR = ( status.insert( Arc(p, itLo->sites.second) ) ).first;
+
+        /** this is to handle infinite edges **/
+        Arc a(itLo->sites.second, p, idE);
+        Point bp = a.getBreakpoint();
+        points.push_back(bp);
+        edgeList[edgeList.size()-1].first = points.size()-1;
+
+        /** insert new arc **/
+        itCurrL = ( status.insert( a ) ).first;
+
         addLeftCircleEvent(p, itLo, itCurrL);
     }
 
-    /** insert new break points **/
-    itCurrL = ( status.insert( Arc(itHi->sites.first, p) ) ).first;
-    itCurrR = ( status.insert( Arc(p, itHi->sites.first) ) ).first;
 }
 
 void VoronoiFilter::handleCircleEvent() {
@@ -286,9 +319,12 @@ void VoronoiFilter::addRightCircleEvent(Point& p, std::set<Arc>::iterator& itHi,
     double dy = center.y - p.y;
     double r = sqrt( dx*dx + dy*dy );
     Point lowest( center.x, center.y - r );
-    // std::cout << "add circle r at " << center << std::endl;
+    std::cout << "add circle r at " << center << std::endl;
     // std::cout << "from " << p << " <-> " <<itHi->sites.first<< " <-> "<<itHi->sites.second << std::endl;
-    eventQueue.insert( Event( lowest, itCurrR, itHi, center ) );
+    Event e( lowest, itCurrR, itHi, center );
+    eventIterator itC = ( eventQueue.insert( e ) ).first;
+    itHi->hasCircleEvent = true;
+    itHi->itCircle = itC;
 }
 
 void VoronoiFilter::addLeftCircleEvent(Point& p, std::set<Arc>::iterator& itLo,
@@ -300,9 +336,12 @@ void VoronoiFilter::addLeftCircleEvent(Point& p, std::set<Arc>::iterator& itLo,
     double dy = center.y - p.y;
     double r = sqrt( dx*dx + dy*dy );
     Point lowest( center.x, center.y - r );
-    // std::cout << "add circle l at " << center << std::endl;
+    std::cout << "add circle l at " << center << std::endl;
     // std::cout << "from " << p << " <-> " <<itLo->sites.first<< " <-> "<<itLo->sites.second << std::endl;
-    eventQueue.insert( Event( lowest, itLo, itCurrL, center ) );
+    Event e( lowest, itLo, itCurrL, center );
+    eventIterator itC = ( eventQueue.insert( e ) ).first;
+    itCurrL->hasCircleEvent = true;
+    itCurrL->itCircle = itC;
 }
 
 
